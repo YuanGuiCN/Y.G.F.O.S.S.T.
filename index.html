@@ -1,0 +1,1826 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover" />
+    <title>客户专属价格表</title>
+    <style>
+        /* ===== 紫蓝色系（保留原配色） ===== */
+        :root {
+            --primary-bg: #0b0d1a;
+            --secondary-bg: #14162e;
+            --card-bg: #1a1c3a;
+            --purple: #a855f7;
+            --purple-light: #c084fc;
+            --blue: #3b82f6;
+            --blue-light: #60a5fa;
+            --accent-gradient: linear-gradient(135deg, var(--purple), var(--blue));
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --border-color: #333366;
+            --radius: 12px;
+            --touch-target: 40px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ===== 全局字体：仿宋（跨平台兼容） ===== */
+        body,
+        input,
+        select,
+        textarea,
+        button {
+            font-family: "仿宋", "FangSong", "STFangSong", "华文仿宋", serif;
+        }
+
+        body {
+            background: var(--primary-bg);
+            color: var(--text-primary);
+            padding: 8px 10px 20px;
+            max-width: 720px;
+            margin: 0 auto;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* ===== 头部 ===== */
+        .app-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px 10px;
+            padding: 4px 0 10px;
+            border-bottom: 1.5px solid var(--border-color);
+            margin-bottom: 10px;
+        }
+        .app-header .brand {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 18px;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
+        }
+        .app-header .brand small {
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            -webkit-text-fill-color: var(--text-secondary);
+        }
+        .header-actions {
+            display: flex;
+            gap: 4px;
+            margin-left: auto;
+        }
+        .header-actions .btn {
+            padding: 4px 10px;
+            font-size: 12px;
+            min-height: 32px;
+            min-width: 32px;
+            border-radius: 8px;
+        }
+
+        /* ===== 按钮 ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.12s cubic-bezier(0.18, 0.89, 0.32, 1.28), opacity 0.15s;
+            background: var(--secondary-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            min-height: var(--touch-target);
+            min-width: var(--touch-target);
+            touch-action: manipulation;
+            transform: translateZ(0);
+        }
+        .btn:active {
+            transform: scale(0.94);
+            opacity: 0.85;
+        }
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: #fff;
+            border-color: transparent;
+        }
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+            border-color: var(--success);
+        }
+        .btn-danger {
+            background: var(--error);
+            color: #fff;
+            border-color: var(--error);
+        }
+        .btn-warning {
+            background: var(--warning);
+            color: #0f172a;
+            border-color: var(--warning);
+        }
+        .btn-sm {
+            padding: 3px 8px;
+            font-size: 12px;
+            min-height: 28px;
+            min-width: 28px;
+            border-radius: 6px;
+        }
+        .btn-icon {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: background 0.12s;
+            color: var(--text-secondary);
+            line-height: 1;
+            min-height: 28px;
+            min-width: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+        }
+        .btn-icon:active {
+            background: var(--card-bg);
+        }
+        .btn-icon.danger:active {
+            color: var(--error);
+        }
+
+        /* ===== 搜索区 ===== */
+        .search-wrapper {
+            position: relative;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .search-wrapper input {
+            width: 100%;
+            padding: 10px 16px;
+            border-radius: 30px;
+            border: 1.5px solid var(--border-color);
+            font-size: 16px;
+            background: var(--secondary-bg);
+            color: var(--text-primary);
+            outline: none;
+            min-height: 44px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .search-wrapper input::placeholder {
+            color: var(--text-muted);
+            opacity: 0.8;
+        }
+        .search-wrapper input:focus {
+            border-color: var(--purple);
+            box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.12);
+        }
+
+        /* 下拉建议列表 */
+        .search-suggestions {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            max-height: 240px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+            padding: 4px 0;
+        }
+        .search-suggestions.active {
+            display: block;
+        }
+        .search-suggestions .suggestion-item {
+            padding: 8px 14px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            transition: background 0.12s;
+            touch-action: manipulation;
+        }
+        .search-suggestions .suggestion-item:active {
+            background: var(--secondary-bg);
+        }
+        .search-suggestions .suggestion-item .sug-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        .search-suggestions .suggestion-item .sug-path {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .search-suggestions .suggestion-item .sug-path::before {
+            content: "📍";
+            font-size: 12px;
+        }
+        .search-suggestions .suggestion-item .sug-type {
+            font-size: 10px;
+            color: var(--purple-light);
+            background: rgba(168, 85, 247, 0.15);
+            padding: 0 8px;
+            border-radius: 30px;
+            display: inline-block;
+            align-self: flex-start;
+        }
+        .search-suggestions .no-result {
+            padding: 16px;
+            color: var(--text-muted);
+            text-align: center;
+            font-size: 14px;
+        }
+
+        /* ===== 客户下拉框 ===== */
+        .customer-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+        .customer-selector label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+        }
+        .customer-selector select {
+            flex: 1;
+            padding: 6px 8px;
+            border-radius: 8px;
+            border: 1.5px solid var(--border-color);
+            background: var(--secondary-bg);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+            outline: none;
+            min-height: 36px;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 32px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .customer-selector select:focus {
+            border-color: var(--purple);
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.12);
+        }
+        .customer-selector select option {
+            background: var(--secondary-bg);
+            color: var(--text-primary);
+        }
+        .customer-selector .actions {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .customer-selector .actions .btn-icon {
+            font-size: 13px;
+            min-width: 30px;
+            min-height: 30px;
+            opacity: 0.5;
+            transition: opacity 0.12s;
+        }
+        .customer-selector .actions .btn-icon:active {
+            opacity: 1;
+        }
+        .customer-selector .actions .btn-icon.active-action {
+            opacity: 0.9;
+        }
+        .customer-selector .add-btn {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: var(--accent-gradient);
+            color: #fff;
+            font-size: 18px;
+            font-weight: 300;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.12s;
+            touch-action: manipulation;
+        }
+        .customer-selector .add-btn:active {
+            transform: scale(0.85);
+        }
+
+        /* ===== 路径显示 ===== */
+        .nav-path {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 4px 8px;
+            background: var(--secondary-bg);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            margin-bottom: 8px;
+        }
+        .nav-path .path-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            margin-right: 4px;
+        }
+        .nav-path .path-empty {
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        .nav-path .path-segment {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .nav-path .path-segment .seg-name {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+        .nav-path .path-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        /* ===== 价格清单 ===== */
+        .info-section {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            padding: 10px 12px 14px;
+            flex: 1;
+            min-height: 180px;
+        }
+        .info-section .info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        .info-section .info-header .info-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .info-section .info-header .info-count {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ===== 价格清单滚动容器 ===== */
+        .info-items {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-height: 50px;
+            max-height: 420px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-right: 4px;
+        }
+
+        .price-card {
+            background: var(--secondary-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 4px;
+            transition: background 0.12s, transform 0.12s, border-color 0.2s;
+            touch-action: manipulation;
+            transform: translateZ(0);
+        }
+        .price-card:active {
+            background: var(--card-bg);
+            transform: scale(0.98);
+        }
+        .price-card.highlight-card {
+            border-color: var(--purple);
+            box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.3);
+        }
+        .price-card .card-main {
+            flex: 1;
+            min-width: 100px;
+        }
+        .price-card .material-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .price-card .price-value {
+            font-size: 14px;
+            color: var(--purple-light);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .price-card .price-value::before {
+            content: "¥";
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .price-card .price-note {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        .price-card .card-actions {
+            display: flex;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+        .price-card .card-actions .btn-icon {
+            font-size: 14px;
+            padding: 2px 4px;
+        }
+        .info-empty {
+            color: var(--text-muted);
+            font-size: 13px;
+            padding: 16px 0;
+            text-align: center;
+            width: 100%;
+        }
+        .highlight {
+            background: rgba(168, 85, 247, 0.25);
+            padding: 0 3px;
+            border-radius: 4px;
+            color: var(--purple-light);
+        }
+
+        /* ===== 模态框 ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(11, 13, 26, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            padding: 20px;
+            touch-action: none;
+            animation: modalFadeIn 0.2s ease;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        .modal-box {
+            background: var(--card-bg);
+            border-radius: 20px;
+            max-width: 400px;
+            width: 100%;
+            padding: 20px 16px 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+            animation: modalSlideIn 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            transform: translateZ(0);
+        }
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.92) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        .modal-box h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .modal-box .sub-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .modal-box label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 3px;
+        }
+        .modal-box input,
+        .modal-box textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            background: var(--secondary-bg);
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            -webkit-appearance: none;
+            appearance: none;
+            min-height: var(--touch-target);
+            touch-action: manipulation;
+        }
+        .modal-box input:focus,
+        .modal-box textarea:focus {
+            border-color: var(--purple);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.10);
+        }
+        .modal-box textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 4px;
+        }
+        .modal-actions .btn {
+            padding: 6px 18px;
+            min-height: var(--touch-target);
+        }
+
+        /* 删除模态框 */
+        .delete-modal .modal-box .delete-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 10px 0 14px;
+        }
+        .delete-modal .modal-box .delete-options .btn {
+            justify-content: center;
+            padding: 10px;
+            font-size: 14px;
+            min-height: 44px;
+            width: 100%;
+        }
+        .delete-modal .modal-box .delete-options .btn-danger-light {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--error);
+            border-color: rgba(239, 68, 68, 0.25);
+        }
+        .delete-modal .modal-box .delete-options .btn-warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            border-color: rgba(245, 158, 11, 0.25);
+        }
+        .delete-modal .modal-box .delete-options .btn-archive {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--blue-light);
+            border-color: rgba(59, 130, 246, 0.25);
+        }
+        .delete-modal .modal-box .delete-item-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            word-break: break-all;
+        }
+
+        /* Toast */
+        .toast-msg {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateZ(0);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            padding: 10px 22px;
+            border-radius: 30px;
+            font: 13px "仿宋", "FangSong", "STFangSong", "华文仿宋", serif;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            z-index: 9999;
+            max-width: 85%;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            font-weight: 500;
+            will-change: opacity;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* 滚动条 */
+        ::-webkit-scrollbar {
+            width: 3px;
+            height: 3px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--secondary-bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-gradient);
+            border-radius: 3px;
+        }
+
+        /* 安全区域 */
+        @supports (padding: max(0px)) {
+            body {
+                padding-left: max(8px, env(safe-area-inset-left));
+                padding-right: max(8px, env(safe-area-inset-right));
+                padding-bottom: max(16px, env(safe-area-inset-bottom));
+            }
+        }
+
+        /* 响应式 */
+        @media (max-width: 480px) {
+            .app-header .brand {
+                font-size: 16px;
+            }
+            .app-header .brand small {
+                font-size: 10px;
+            }
+            .search-wrapper input {
+                font-size: 15px;
+                padding: 8px 14px;
+                min-height: 38px;
+            }
+            .customer-selector {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 6px;
+            }
+            .customer-selector select {
+                min-height: 32px;
+                font-size: 13px;
+            }
+            .customer-selector .actions {
+                justify-content: flex-end;
+            }
+            .price-card .material-name {
+                font-size: 14px;
+            }
+            .price-card .price-value {
+                font-size: 13px;
+            }
+            .modal-box {
+                padding: 16px 12px;
+            }
+            .btn {
+                font-size: 12px;
+                padding: 4px 8px;
+                min-height: 32px;
+                min-width: 32px;
+            }
+            .info-items {
+                max-height: 300px;
+            }
+        }
+        @media (max-width: 380px) {
+            .app-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 4px;
+            }
+            .header-actions {
+                justify-content: stretch;
+            }
+            .header-actions .btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+
+        input,
+        select,
+        textarea {
+            font-size: 16px !important;
+        }
+
+        @media print {
+            .btn,
+            .header-actions,
+            .search-wrapper,
+            .customer-selector .add-btn,
+            .customer-selector .actions,
+            .nav-path .path-actions,
+            .price-card .card-actions {
+                display: none !important;
+            }
+            .customer-selector,
+            .nav-path,
+            .info-section {
+                break-inside: avoid;
+            }
+            body {
+                background: #fff;
+                color: #000;
+            }
+            .price-card {
+                background: #f5f5f5;
+                border-color: #ccc;
+            }
+            .customer-selector select {
+                background: #f0f0f0;
+                color: #000;
+                border-color: #ccc;
+            }
+            .info-items {
+                max-height: none;
+                overflow-y: visible;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 头部 ===== -->
+    <header class="app-header">
+        <div class="brand">
+            📋 客户专属价格表
+            <small>一客一价</small>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-success" id="saveBtn">💾 保存</button>
+            <button class="btn btn-primary" id="loadBtn">📂 加载</button>
+            <button class="btn btn-danger" id="resetBtn">↺</button>
+        </div>
+    </header>
+
+    <!-- ===== 搜索区 ===== -->
+    <div class="search-wrapper">
+        <input type="text" id="globalSearch" placeholder="🔍 全局搜索 客户、材料、价格..." inputmode="search" autocomplete="off" />
+        <div class="search-suggestions" id="searchSuggestions"></div>
+    </div>
+
+    <!-- ===== 客户下拉框 ===== -->
+    <div class="customer-selector" id="customerSelector">
+        <label for="customerSelect">客户</label>
+        <select id="customerSelect" aria-label="选择客户"></select>
+        <div class="actions">
+            <button class="btn-icon" id="editCustomerBtn" title="编辑当前客户" style="display:none;">✎</button>
+            <button class="btn-icon danger" id="deleteCustomerBtn" title="删除当前客户" style="display:none;">✕</button>
+            <button class="add-btn" id="addCustomerBtn" title="添加客户">+</button>
+        </div>
+    </div>
+
+    <!-- ===== 路径显示 ===== -->
+    <div class="nav-path" id="navPath">
+        <span class="path-label">📍 当前客户</span>
+        <span id="pathDisplay" class="path-empty">未选择</span>
+        <div class="path-actions">
+            <button class="btn btn-sm btn-primary" id="addPriceBtn">+ 添加价格</button>
+        </div>
+    </div>
+
+    <!-- ===== 价格清单（带滚动） ===== -->
+    <section class="info-section" id="infoSection">
+        <div class="info-header">
+            <span class="info-title">📋 价格清单</span>
+            <span class="info-count" id="itemCount"></span>
+        </div>
+        <div class="info-items" id="infoItems">
+            <div class="info-empty">← 选择客户查看价格</div>
+        </div>
+    </section>
+
+    <!-- ===== 模态框：编辑/添加 ===== -->
+    <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true">
+        <div class="modal-box">
+            <h3 id="modalTitle">编辑</h3>
+            <label for="modalProductName" id="modalNameLabel">名称 *</label>
+            <input type="text" id="modalProductName" placeholder="请输入..." inputmode="text" autocomplete="off" />
+            <label for="modalLocation" id="modalPriceLabel" style="display:none;">价格</label>
+            <input type="text" id="modalLocation" placeholder="例如：25.00" inputmode="decimal" style="display:none;" autocomplete="off" />
+            <label for="modalNote" id="modalNoteLabel" style="display:none;">备注</label>
+            <textarea id="modalNote" placeholder="补充说明..." style="display:none;"></textarea>
+            <div class="modal-actions">
+                <button class="btn" id="modalCancel">取消</button>
+                <button class="btn btn-primary" id="modalConfirm">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 删除模态框 ===== -->
+    <div class="modal-overlay delete-modal" id="deleteModalOverlay" role="dialog" aria-modal="true">
+        <div class="modal-box">
+            <h3 id="deleteModalTitle">🗑️ 删除确认</h3>
+            <p class="sub-text">选择删除方式：</p>
+            <div style="margin:4px 0 2px;font-size:14px;color:var(--text-secondary);">
+                即将删除：<span class="delete-item-name" id="deleteItemName">—</span>
+            </div>
+            <div class="delete-options">
+                <button class="btn btn-warning" id="deleteOnlyBtn">📄 仅删除客户（价格移到“未归类”）</button>
+                <button class="btn btn-archive" id="deleteArchiveBtn">📁 删除客户，价格归档到新客户</button>
+                <button class="btn btn-danger" id="deleteCascadeBtn">🗑️ 删除客户及所有价格</button>
+            </div>
+            <div class="modal-actions" style="margin-top:4px;">
+                <button class="btn" id="deleteCancelBtn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== 归档命名模态框 ===== -->
+    <div class="modal-overlay" id="archiveModalOverlay" role="dialog" aria-modal="true">
+        <div class="modal-box">
+            <h3>📁 新建客户归档</h3>
+            <p class="sub-text">输入新客户名称，价格将移入该客户：</p>
+            <label for="archiveNameInput">客户名称 *</label>
+            <input type="text" id="archiveNameInput" placeholder="例如：已归档客户" inputmode="text" autocomplete="off" />
+            <div class="modal-actions">
+                <button class="btn" id="archiveCancelBtn">取消</button>
+                <button class="btn btn-primary" id="archiveConfirmBtn">确认归档</button>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" accept=".json" />
+
+    <script>
+        // ================================================================
+        //  工具 & 状态
+        // ================================================================
+        function genId() { return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7); }
+
+        const DEFAULT_DATA = [];
+        let data = [];
+        let selectedCustomerId = null;
+        let globalSearchTerm = '';
+        let deleteContext = { id: null, name: '' };
+        let archiveContext = { id: null };
+        let editContext = { type: null, parentId: null, itemId: null, isNew: false, callback: null };
+        let renderPending = false;
+        let renderQueue = [];
+
+        function scheduleRender(fn) {
+            renderQueue.push(fn);
+            if (!renderPending) {
+                renderPending = true;
+                requestAnimationFrame(() => {
+                    const queue = renderQueue;
+                    renderQueue = [];
+                    renderPending = false;
+                    for (const f of queue) { try { f(); } catch (e) { console.warn('Render error:', e); } }
+                });
+            }
+        }
+
+        function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+        // ---- 数据访问 ----
+        function getCustomerById(id) { return data.find(c => c.id === id) || null; }
+
+        function getItemNameById(type, id) {
+            if (type === 'customer') {
+                const c = getCustomerById(id);
+                return c ? c.name : '未知';
+            }
+            if (type === 'price') {
+                for (const c of data) {
+                    if (c.items) {
+                        const found = c.items.find(i => i.id === id);
+                        if (found) return found.name || '未命名';
+                    }
+                }
+                return '未知';
+            }
+            return '未知';
+        }
+
+        function getFullPathInfo(type, id) {
+            if (type === 'customer') {
+                const c = getCustomerById(id);
+                if (!c) return null;
+                return { customer: c.name, item: null };
+            }
+            if (type === 'price') {
+                for (const c of data) {
+                    if (c.items) {
+                        const found = c.items.find(i => i.id === id);
+                        if (found) {
+                            return { customer: c.name, item: found };
+                        }
+                    }
+                }
+                return null;
+            }
+            return null;
+        }
+
+        // ---- 迁移 ----
+        function migrateItems(items) {
+            if (!items) return [];
+            return items.map(item => {
+                if (typeof item === 'string') {
+                    return { id: genId(), name: item, location: '', note: '' };
+                }
+                return {
+                    id: item.id || genId(),
+                    name: item.name || item.content || '未命名',
+                    location: item.location || '',
+                    note: item.note || ''
+                };
+            });
+        }
+
+        function migrateData(tree) {
+            if (Array.isArray(tree)) {
+                const hasChildren = tree.some(item => item.children !== undefined);
+                if (hasChildren) {
+                    const newData = [];
+                    for (const main of tree) {
+                        if (main.children) {
+                            for (const sec of main.children) {
+                                if (sec.children) {
+                                    for (const ter of sec.children) {
+                                        const customerName = `${main.name} - ${sec.name} - ${ter.name}`;
+                                        newData.push({
+                                            id: genId(),
+                                            name: customerName,
+                                            items: migrateItems(ter.items || [])
+                                        });
+                                    }
+                                } else {
+                                    newData.push({
+                                        id: genId(),
+                                        name: sec.name,
+                                        items: migrateItems(sec.items || [])
+                                    });
+                                }
+                            }
+                        } else {
+                            newData.push({
+                                id: genId(),
+                                name: main.name,
+                                items: migrateItems(main.items || [])
+                            });
+                        }
+                    }
+                    return newData;
+                } else {
+                    return tree.map(c => {
+                        return {
+                            ...c,
+                            items: migrateItems(c.items || [])
+                        };
+                    });
+                }
+            }
+            return [];
+        }
+
+        // ---- 存储 ----
+        const STORAGE_KEY = 'customer_price_data_v4';
+
+        function saveToLocalStorage() {
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) { /* ignore */ }
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) {
+                        data = migrateData(parsed);
+                        return true;
+                    }
+                }
+            } catch (e) { /* ignore */ }
+            return false;
+        }
+
+        function exportToJSON() {
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `客户价格表_${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 3000);
+            showToast('📁 文件已生成');
+        }
+
+        function importFromJSON(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (Array.isArray(parsed)) {
+                        data = migrateData(parsed);
+                        saveToLocalStorage();
+                        autoSelectFirst();
+                        renderAll();
+                        showToast('✅ 数据导入成功！');
+                    } else {
+                        showToast('❌ 无效的数据格式');
+                    }
+                } catch (err) {
+                    showToast('❌ 文件解析失败: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function autoSelectFirst() {
+            if (data.length > 0) {
+                selectedCustomerId = data[0].id;
+            } else {
+                selectedCustomerId = null;
+            }
+        }
+
+        // ================================================================
+        //  渲染函数
+        // ================================================================
+
+        // ---- 下拉框 ----
+        function renderCustomerSelect() {
+            const select = document.getElementById('customerSelect');
+            const options = data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            select.innerHTML = `<option value="">-- 请选择客户 --</option>` + options;
+            if (selectedCustomerId) {
+                const opt = select.querySelector(`option[value="${selectedCustomerId}"]`);
+                if (opt) select.value = selectedCustomerId;
+            } else {
+                select.value = '';
+            }
+            const show = !!selectedCustomerId;
+            document.getElementById('editCustomerBtn').style.display = show ? 'inline-flex' : 'none';
+            document.getElementById('deleteCustomerBtn').style.display = show ? 'inline-flex' : 'none';
+            updatePathDisplay();
+        }
+
+        // ---- 路径 ----
+        function updatePathDisplay() {
+            const pathEl = document.getElementById('pathDisplay');
+            const customer = selectedCustomerId ? getCustomerById(selectedCustomerId) : null;
+            if (customer) {
+                pathEl.innerHTML = `<span class="path-segment"><span class="seg-name">${customer.name}</span></span>`;
+            } else {
+                pathEl.innerHTML = '<span class="path-empty">未选择</span>';
+            }
+        }
+
+        // ---- 价格清单 ----
+        function renderPriceItems() {
+            const container = document.getElementById('infoItems');
+            const countEl = document.getElementById('itemCount');
+            const searchTerm = globalSearchTerm.trim().toLowerCase();
+
+            if (searchTerm) {
+                const results = performGlobalSearch(searchTerm);
+                if (results.length === 0) {
+                    container.innerHTML = `<div class="info-empty">🔍 未找到匹配项</div>`;
+                    countEl.textContent = '0 匹配';
+                    return;
+                }
+                let html = '';
+                let itemCount = 0;
+                for (const res of results) {
+                    if (res.type === 'price') {
+                        const item = res.item;
+                        const priceDisplay = item.location ? '¥' + highlightText(item.location, searchTerm) : '未定价';
+                        const nameDisplay = highlightText(item.name, searchTerm);
+                        const noteDisplay = item.note ? highlightText(item.note, searchTerm) : '';
+                        html += `
+                            <div class="price-card" data-id="${item.id}">
+                                <div class="card-main">
+                                    <div class="material-name">${nameDisplay}</div>
+                                    <div class="price-value">${priceDisplay}</div>
+                                    ${noteDisplay ? `<div class="price-note">📝 ${noteDisplay}</div>` : ''}
+                                </div>
+                                <div class="card-actions">
+                                    <button class="btn-icon" data-action="editPrice" data-id="${item.id}" title="编辑">✎</button>
+                                    <button class="btn-icon danger" data-action="deletePrice" data-id="${item.id}" title="删除">✕</button>
+                                </div>
+                            </div>
+                            <div style="font-size:11px;color:var(--text-muted);padding:0 12px 6px;border-bottom:1px solid var(--border-color);">📍 ${highlightText(res.path, searchTerm)}</div>
+                        `;
+                        itemCount++;
+                    } else {
+                        html += `
+                            <div class="price-card" style="flex-direction:column;align-items:stretch;gap:2px;padding:10px 12px;cursor:pointer;" data-nav-type="customer" data-nav-id="${res.id}">
+                                <div style="display:flex;justify-content:space-between;align-items:center;">
+                                    <span style="font-weight:700;">${highlightText(res.name, searchTerm)}</span>
+                                    <span style="font-size:12px;color:var(--purple-light);">客户</span>
+                                </div>
+                                <div style="font-size:12px;color:var(--text-muted);">📍 ${highlightText(res.path, searchTerm)}</div>
+                            </div>
+                        `;
+                        itemCount++;
+                    }
+                }
+                container.innerHTML = html;
+                countEl.textContent = `匹配 ${itemCount} 项`;
+                container.querySelectorAll('[data-nav-type]').forEach(el => {
+                    el.addEventListener('click', () => {
+                        const type = el.dataset.navType;
+                        const id = el.dataset.navId;
+                        navigateTo(type, id);
+                    });
+                });
+                bindPriceActions();
+                return;
+            }
+
+            // 正常模式
+            const customer = selectedCustomerId ? getCustomerById(selectedCustomerId) : null;
+            if (!customer) {
+                container.innerHTML = `<div class="info-empty">← 选择客户查看价格</div>`;
+                countEl.textContent = '';
+                return;
+            }
+
+            const items = customer.items || [];
+            countEl.textContent = `共 ${items.length} 项`;
+
+            if (items.length === 0) {
+                container.innerHTML = `<div class="info-empty">📭 暂无价格，点击 “+ 添加价格”</div>`;
+                return;
+            }
+
+            let html = '';
+            for (const item of items) {
+                const priceDisplay = item.location ? '¥' + item.location : '未定价';
+                html += `
+                    <div class="price-card" data-id="${item.id}">
+                        <div class="card-main">
+                            <div class="material-name">${item.name}</div>
+                            <div class="price-value">${priceDisplay}</div>
+                            ${item.note ? `<div class="price-note">📝 ${item.note}</div>` : ''}
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-icon" data-action="editPrice" data-id="${item.id}" title="编辑">✎</button>
+                            <button class="btn-icon danger" data-action="deletePrice" data-id="${item.id}" title="删除">✕</button>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+            bindPriceActions();
+        }
+
+        function bindPriceActions() {
+            document.querySelectorAll('[data-action="editPrice"]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openEditModal('price', btn.dataset.id);
+                });
+            });
+            document.querySelectorAll('[data-action="deletePrice"]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const id = btn.dataset.id;
+                    const name = getItemNameById('price', id);
+                    showDeleteModal('price', id, name);
+                });
+            });
+        }
+
+        function highlightText(text, term) {
+            if (!text || !term) return text || '';
+            const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        // ---- 全局搜索 ----
+        function performGlobalSearch(term) {
+            const trimmed = term.trim().toLowerCase();
+            const results = [];
+            if (!trimmed) return results;
+
+            for (const customer of data) {
+                if (customer.name.toLowerCase().includes(trimmed)) {
+                    results.push({ type: 'customer', id: customer.id, name: customer.name, path: customer.name });
+                }
+                if (customer.items) {
+                    for (const item of customer.items) {
+                        const nameMatch = item.name.toLowerCase().includes(trimmed);
+                        const locMatch = item.location && item.location.toLowerCase().includes(trimmed);
+                        const noteMatch = item.note && item.note.toLowerCase().includes(trimmed);
+                        if (nameMatch || locMatch || noteMatch) {
+                            results.push({
+                                type: 'price',
+                                id: item.id,
+                                name: item.name,
+                                path: `${customer.name} › ${item.name}`,
+                                item: item
+                            });
+                        }
+                    }
+                }
+            }
+
+            const seen = new Set();
+            const unique = results.filter(r => {
+                const key = r.type + '_' + r.id;
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
+            return unique.slice(0, 30);
+        }
+
+        // ---- 搜索建议下拉 ----
+        function renderSuggestions(term) {
+            const container = document.getElementById('searchSuggestions');
+            if (!term || term.trim().length === 0) {
+                container.classList.remove('active');
+                return;
+            }
+            const results = performGlobalSearch(term);
+            if (results.length === 0) {
+                container.innerHTML = `<div class="no-result">没有匹配项</div>`;
+                container.classList.add('active');
+                return;
+            }
+            let html = '';
+            for (const res of results) {
+                const typeLabel = res.type === 'customer' ? '客户' : '价格';
+                const nameHighlight = highlightText(res.name, term);
+                const pathHighlight = highlightText(res.path, term);
+                html += `
+                    <div class="suggestion-item" data-type="${res.type}" data-id="${res.id}">
+                        <div class="sug-name">${nameHighlight}</div>
+                        <div class="sug-path">${pathHighlight}</div>
+                        <span class="sug-type">${typeLabel}</span>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+            container.classList.add('active');
+
+            container.querySelectorAll('.suggestion-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    const type = el.dataset.type;
+                    const id = el.dataset.id;
+                    navigateTo(type, id);
+                });
+            });
+        }
+
+        function closeSuggestions() {
+            document.getElementById('searchSuggestions').classList.remove('active');
+        }
+
+        // ---- 导航到目标 ----
+        function navigateTo(type, id) {
+            if (type === 'customer') {
+                selectedCustomerId = id;
+                globalSearchTerm = '';
+                document.getElementById('globalSearch').value = '';
+                closeSuggestions();
+                renderAll();
+                showToast('✅ 已定位到客户：' + getItemNameById('customer', id));
+                return;
+            }
+            if (type === 'price') {
+                for (const c of data) {
+                    if (c.items && c.items.some(i => i.id === id)) {
+                        selectedCustomerId = c.id;
+                        break;
+                    }
+                }
+                globalSearchTerm = '';
+                document.getElementById('globalSearch').value = '';
+                closeSuggestions();
+                renderAll();
+                setTimeout(() => {
+                    const card = document.querySelector(`.price-card[data-id="${id}"]`);
+                    if (card) {
+                        card.classList.add('highlight-card');
+                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        setTimeout(() => card.classList.remove('highlight-card'), 2000);
+                    }
+                }, 150);
+                showToast('✅ 已定位到价格：' + getItemNameById('price', id));
+            }
+        }
+
+        // ---- 全量渲染 ----
+        function renderAll() {
+            scheduleRender(() => {
+                renderCustomerSelect();
+                renderPriceItems();
+                saveToLocalStorage();
+            });
+        }
+
+        // ================================================================
+        //  选择逻辑（下拉框事件）
+        // ================================================================
+        function onCustomerSelect(value) {
+            if (!value) {
+                selectedCustomerId = null;
+                renderAll();
+                return;
+            }
+            selectedCustomerId = value;
+            globalSearchTerm = '';
+            document.getElementById('globalSearch').value = '';
+            closeSuggestions();
+            renderAll();
+        }
+
+        // ================================================================
+        //  CRUD 操作
+        // ================================================================
+
+        // ---- 客户 ----
+        function addCustomer(name) {
+            if (!name.trim()) { showToast('⚠️ 名称不能为空'); return; }
+            const newNode = { id: genId(), name: name.trim(), items: [] };
+            data.push(newNode);
+            selectedCustomerId = newNode.id;
+            renderAll();
+            showToast('✅ 已添加客户');
+        }
+
+        function editCustomer(id, newName) {
+            if (!newName.trim()) { showToast('⚠️ 名称不能为空'); return; }
+            const node = getCustomerById(id);
+            if (node) { node.name = newName.trim();
+                renderAll();
+                showToast('✅ 已更新'); }
+        }
+
+        function deleteCustomer(id, mode, archiveName) {
+            const idx = data.findIndex(c => c.id === id);
+            if (idx === -1) return;
+            const customer = data[idx];
+            const items = customer.items || [];
+
+            if (mode === 'cascade') {
+                data.splice(idx, 1);
+            } else if (mode === 'only') {
+                data.splice(idx, 1);
+                if (items.length > 0) {
+                    let uncat = data.find(c => c.name === '未归类');
+                    if (!uncat) {
+                        uncat = { id: genId(), name: '未归类', items: [] };
+                        data.push(uncat);
+                    }
+                    if (!uncat.items) uncat.items = [];
+                    uncat.items.push(...items);
+                }
+            } else if (mode === 'archive') {
+                data.splice(idx, 1);
+                if (items.length > 0) {
+                    const newCustomer = { id: genId(), name: archiveName || '已归档', items: items };
+                    data.splice(idx, 0, newCustomer);
+                }
+            }
+
+            if (selectedCustomerId === id) {
+                selectedCustomerId = data.length ? data[0].id : null;
+            }
+            renderAll();
+            const msg = mode === 'only' ? '已删除，价格移至"未归类"' : mode === 'cascade' ? '已级联删除' : '已删除，价格归档到新客户';
+            showToast('🗑️ ' + msg);
+        }
+
+        // ---- 价格 ----
+        function addPrice(customerId, name, location, note) {
+            if (!name.trim()) { showToast('⚠️ 材料名称不能为空'); return; }
+            const customer = getCustomerById(customerId);
+            if (!customer) { showToast('⚠️ 请先选择客户'); return; }
+            if (!customer.items) customer.items = [];
+            customer.items.push({ id: genId(), name: name.trim(), location: location.trim() || '', note: note.trim() || '' });
+            renderPriceItems();
+            saveToLocalStorage();
+            showToast('✅ 已添加价格');
+        }
+
+        function editPrice(id, name, location, note) {
+            if (!name.trim()) { showToast('⚠️ 材料名称不能为空'); return; }
+            for (const c of data) {
+                if (c.items) {
+                    const item = c.items.find(i => i.id === id);
+                    if (item) {
+                        item.name = name.trim();
+                        item.location = location.trim() || '';
+                        item.note = note.trim() || '';
+                        renderPriceItems();
+                        saveToLocalStorage();
+                        showToast('✅ 已更新');
+                        return;
+                    }
+                }
+            }
+        }
+
+        function deletePrice(id) {
+            for (const c of data) {
+                if (c.items) {
+                    const idx = c.items.findIndex(i => i.id === id);
+                    if (idx !== -1) {
+                        c.items.splice(idx, 1);
+                        renderPriceItems();
+                        saveToLocalStorage();
+                        showToast('🗑️ 已删除价格');
+                        return;
+                    }
+                }
+            }
+        }
+
+        // ================================================================
+        //  模态框
+        // ================================================================
+
+        function showDeleteModal(type, id, name) {
+            deleteContext.id = id;
+            deleteContext.name = name;
+            document.getElementById('deleteItemName').textContent = name || '—';
+            if (type === 'price') {
+                document.getElementById('deleteModalTitle').textContent = `🗑️ 删除「${name || '此项'}」`;
+                document.getElementById('deleteOnlyBtn').style.display = 'none';
+                document.getElementById('deleteArchiveBtn').style.display = 'none';
+                document.getElementById('deleteCascadeBtn').textContent = '🗑️ 删除此项';
+                document.getElementById('deleteCascadeBtn').style.display = 'flex';
+            } else {
+                document.getElementById('deleteModalTitle').textContent = `🗑️ 删除客户「${name || '此项'}」`;
+                document.getElementById('deleteOnlyBtn').style.display = 'flex';
+                document.getElementById('deleteArchiveBtn').style.display = 'flex';
+                document.getElementById('deleteCascadeBtn').textContent = '🗑️ 删除客户及所有价格';
+                document.getElementById('deleteCascadeBtn').style.display = 'flex';
+            }
+            document.getElementById('deleteModalOverlay').classList.add('active');
+        }
+
+        document.getElementById('deleteOnlyBtn').addEventListener('click', () => {
+            const id = deleteContext.id;
+            if (id) {
+                deleteCustomer(id, 'only');
+                closeDeleteModal();
+            }
+        });
+        document.getElementById('deleteCascadeBtn').addEventListener('click', () => {
+            const id = deleteContext.id;
+            if (id) {
+                const isPrice = document.querySelector(`.price-card[data-id="${id}"]`) !== null;
+                if (isPrice) {
+                    deletePrice(id);
+                } else {
+                    deleteCustomer(id, 'cascade');
+                }
+                closeDeleteModal();
+            }
+        });
+        document.getElementById('deleteArchiveBtn').addEventListener('click', () => {
+            const id = deleteContext.id;
+            if (id) {
+                const customer = getCustomerById(id);
+                if (customer && customer.items && customer.items.length > 0) {
+                    archiveContext.id = id;
+                    document.getElementById('archiveNameInput').value = '';
+                    document.getElementById('archiveModalOverlay').classList.add('active');
+                    closeDeleteModal();
+                } else {
+                    deleteCustomer(id, 'only');
+                    closeDeleteModal();
+                }
+            }
+        });
+        document.getElementById('deleteCancelBtn').addEventListener('click', closeDeleteModal);
+        document.getElementById('deleteModalOverlay').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeDeleteModal();
+        });
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModalOverlay').classList.remove('active');
+            deleteContext = { id: null, name: '' };
+        }
+
+        // 归档
+        document.getElementById('archiveCancelBtn').addEventListener('click', () => {
+            document.getElementById('archiveModalOverlay').classList.remove('active');
+        });
+        document.getElementById('archiveModalOverlay').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) document.getElementById('archiveModalOverlay').classList.remove('active');
+        });
+        document.getElementById('archiveConfirmBtn').addEventListener('click', () => {
+            const name = document.getElementById('archiveNameInput').value.trim();
+            if (!name) { showToast('⚠️ 请输入客户名称'); return; }
+            const id = archiveContext.id;
+            if (id) {
+                deleteCustomer(id, 'archive', name);
+                document.getElementById('archiveModalOverlay').classList.remove('active');
+            }
+        });
+        document.getElementById('archiveNameInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('archiveConfirmBtn').click();
+        });
+
+        // 编辑/添加模态框
+        function openEditModal(type, id) {
+            const overlay = document.getElementById('modalOverlay');
+            const title = document.getElementById('modalTitle');
+            const nameInput = document.getElementById('modalProductName');
+            const locInput = document.getElementById('modalLocation');
+            const noteInput = document.getElementById('modalNote');
+            const nameLabel = document.getElementById('modalNameLabel');
+            const priceLabel = document.getElementById('modalPriceLabel');
+            const noteLabel = document.getElementById('modalNoteLabel');
+
+            [nameInput, locInput, noteInput].forEach(el => el.value = '');
+            locInput.style.display = 'none';
+            priceLabel.style.display = 'none';
+            noteInput.style.display = 'none';
+            noteLabel.style.display = 'none';
+
+            if (type === 'customer') {
+                const node = getCustomerById(id);
+                const name = node ? node.name : '';
+                title.textContent = '✎ 编辑客户';
+                nameLabel.textContent = '客户名称 *';
+                nameInput.value = name;
+                overlay.classList.add('active');
+                nameInput.focus();
+                nameInput.select();
+                editContext.type = 'customer';
+                editContext.itemId = id;
+                editContext.isNew = false;
+                editContext.callback = (val) => { editCustomer(id, val); };
+                return;
+            }
+
+            let item = null;
+            for (const c of data) {
+                if (c.items) {
+                    const found = c.items.find(i => i.id === id);
+                    if (found) { item = found; break; }
+                }
+            }
+            if (!item) { showToast('⚠️ 未找到价格条目'); return; }
+            title.textContent = '✎ 编辑价格';
+            nameLabel.textContent = '材料名称 *';
+            priceLabel.textContent = '价格';
+            noteLabel.textContent = '备注';
+            nameInput.value = item.name || '';
+            locInput.value = item.location || '';
+            noteInput.value = item.note || '';
+            locInput.style.display = 'block';
+            priceLabel.style.display = 'block';
+            noteInput.style.display = 'block';
+            noteLabel.style.display = 'block';
+            overlay.classList.add('active');
+            nameInput.focus();
+            nameInput.select();
+
+            editContext.type = 'price';
+            editContext.itemId = id;
+            editContext.isNew = false;
+            editContext.callback = (name, location, note) => { editPrice(id, name, location, note); };
+        }
+
+        function openAddModal(type, parentId) {
+            const overlay = document.getElementById('modalOverlay');
+            const title = document.getElementById('modalTitle');
+            const nameInput = document.getElementById('modalProductName');
+            const locInput = document.getElementById('modalLocation');
+            const noteInput = document.getElementById('modalNote');
+            const nameLabel = document.getElementById('modalNameLabel');
+            const priceLabel = document.getElementById('modalPriceLabel');
+            const noteLabel = document.getElementById('modalNoteLabel');
+
+            [nameInput, locInput, noteInput].forEach(el => el.value = '');
+            locInput.style.display = 'none';
+            priceLabel.style.display = 'none';
+            noteInput.style.display = 'none';
+            noteLabel.style.display = 'none';
+
+            if (type === 'customer') {
+                title.textContent = '➕ 添加客户';
+                nameLabel.textContent = '客户名称 *';
+                overlay.classList.add('active');
+                nameInput.focus();
+                editContext.type = 'customer';
+                editContext.isNew = true;
+                editContext.callback = (val) => { if (val.trim()) addCustomer(val.trim()); };
+                return;
+            }
+
+            if (!parentId) { showToast('⚠️ 请先选择客户'); return; }
+            title.textContent = '➕ 添加价格';
+            nameLabel.textContent = '材料名称 *';
+            priceLabel.textContent = '价格';
+            noteLabel.textContent = '备注';
+            locInput.style.display = 'block';
+            priceLabel.style.display = 'block';
+            noteInput.style.display = 'block';
+            noteLabel.style.display = 'block';
+            overlay.classList.add('active');
+            nameInput.focus();
+
+            editContext.type = 'price';
+            editContext.parentId = parentId;
+            editContext.isNew = true;
+            editContext.callback = (name, location, note) => {
+                if (name.trim() && parentId) {
+                    addPrice(parentId, name.trim(), location.trim(), note.trim());
+                } else {
+                    showToast('⚠️ 材料名称不能为空');
+                }
+            };
+        }
+
+        document.getElementById('modalCancel').addEventListener('click', () => {
+            document.getElementById('modalOverlay').classList.remove('active');
+        });
+        document.getElementById('modalOverlay').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) document.getElementById('modalOverlay').classList.remove('active');
+        });
+        document.getElementById('modalConfirm').addEventListener('click', () => {
+            const nameInput = document.getElementById('modalProductName');
+            const locInput = document.getElementById('modalLocation');
+            const noteInput = document.getElementById('modalNote');
+            const type = editContext.type;
+            if (type === 'customer') {
+                const val = nameInput.value.trim();
+                if (!val) { showToast('⚠️ 名称不能为空'); return; }
+                if (editContext.callback) editContext.callback(val);
+                document.getElementById('modalOverlay').classList.remove('active');
+                return;
+            }
+            const name = nameInput.value.trim();
+            const location = locInput.value.trim();
+            const note = noteInput.value.trim();
+            if (!name) { showToast('⚠️ 材料名称不能为空'); return; }
+            if (editContext.callback) editContext.callback(name, location, note);
+            document.getElementById('modalOverlay').classList.remove('active');
+        });
+        document.getElementById('modalProductName').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('modalConfirm').click();
+        });
+        document.getElementById('modalLocation').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('modalConfirm').click();
+        });
+
+        // ================================================================
+        //  Toast
+        // ================================================================
+        function showToast(msg) {
+            const old = document.querySelector('.toast-msg');
+            if (old) old.remove();
+            const div = document.createElement('div');
+            div.className = 'toast-msg';
+            div.textContent = msg;
+            document.body.appendChild(div);
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => { div.style.opacity = '1'; });
+            });
+            setTimeout(() => {
+                div.style.opacity = '0';
+                setTimeout(() => div.remove(), 300);
+            }, 2200);
+        }
+
+        // ================================================================
+        //  事件绑定
+        // ================================================================
+
+        document.getElementById('customerSelect').addEventListener('change', (e) => {
+            onCustomerSelect(e.target.value);
+        });
+
+        document.getElementById('addCustomerBtn').addEventListener('click', () => openAddModal('customer', null));
+        document.getElementById('editCustomerBtn').addEventListener('click', () => {
+            if (selectedCustomerId) openEditModal('customer', selectedCustomerId);
+        });
+        document.getElementById('deleteCustomerBtn').addEventListener('click', () => {
+            if (selectedCustomerId) {
+                const name = getItemNameById('customer', selectedCustomerId);
+                showDeleteModal('customer', selectedCustomerId, name);
+            }
+        });
+
+        document.getElementById('addPriceBtn').addEventListener('click', () => {
+            if (!selectedCustomerId) { showToast('⚠️ 请先选择客户'); return; }
+            openAddModal('price', selectedCustomerId);
+        });
+
+        document.getElementById('saveBtn').addEventListener('click', exportToJSON);
+        document.getElementById('loadBtn').addEventListener('click', () => document.getElementById('fileInput').click());
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                importFromJSON(e.target.files[0]);
+                e.target.value = '';
+            }
+        });
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            if (confirm('⚠️ 重置将清除所有数据，恢复为空状态。确定吗？')) {
+                data = [];
+                selectedCustomerId = null;
+                renderAll();
+                showToast('↺ 已重置');
+            }
+        });
+
+        let searchTimeout = null;
+        document.getElementById('globalSearch').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            const term = e.target.value;
+            searchTimeout = setTimeout(() => {
+                globalSearchTerm = term;
+                renderSuggestions(term);
+                renderPriceItems();
+            }, 180);
+        });
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-wrapper')) {
+                closeSuggestions();
+            }
+        });
+
+        // ================================================================
+        //  初始化
+        // ================================================================
+        function init() {
+            if (!loadFromLocalStorage()) {
+                data = deepClone(DEFAULT_DATA);
+            }
+            autoSelectFirst();
+            renderAll();
+            if (data.length === 0) {
+                document.getElementById('customerSelect').innerHTML = `<option value="">-- 请先添加客户 --</option>`;
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+
+        console.log('📋 客户专属价格表 v4 · 仿宋 + 粗体 + 滚动');
+    </script>
+</body>
+</html>
