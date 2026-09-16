@@ -712,6 +712,69 @@
             min-height: var(--touch-target);
         }
 
+        /* ===== 表单字段 + 输入建议 ===== */
+        .form-field {
+            margin-bottom: 12px;
+        }
+        .form-field input,
+        .form-field textarea {
+            margin-bottom: 0 !important;
+        }
+        .form-field:last-of-type {
+            margin-bottom: 8px;
+        }
+        .input-suggest-wrap {
+            position: relative;
+        }
+        .input-suggestions {
+            position: absolute;
+            top: calc(100% + 2px);
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            max-height: 180px;
+            overflow-y: auto;
+            z-index: 5;
+            display: none;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.55);
+            padding: 3px 0;
+            -webkit-overflow-scrolling: touch;
+        }
+        .input-suggestions.active {
+            display: block;
+        }
+        .input-suggestions .sug-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: background 0.1s;
+            touch-action: manipulation;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .input-suggestions .sug-item:last-child {
+            border-bottom: none;
+        }
+        .input-suggestions .sug-item:hover,
+        .input-suggestions .sug-item:active {
+            background: var(--secondary-bg);
+        }
+        .input-suggestions .sug-item .sug-match {
+            color: var(--purple-light);
+            font-weight: 700;
+            background: rgba(168, 85, 247, 0.15);
+            border-radius: 3px;
+            padding: 0 1px;
+        }
+        .input-suggestions .sug-empty {
+            padding: 10px 12px;
+            color: var(--text-muted);
+            text-align: center;
+            font-size: 12px;
+        }
+
         .delete-modal .modal-box .delete-options {
             display: flex;
             flex-direction: column;
@@ -832,7 +895,7 @@
             .btn, .header-actions, .search-wrapper,
             .customer-selector .add-btn, .customer-selector .actions,
             .nav-path .path-actions, .price-card .card-actions,
-            .jump-link, .mode-toggle {
+            .jump-link, .mode-toggle, .input-suggestions {
                 display: none !important;
             }
             .customer-selector, .nav-path, .info-section { break-inside: avoid; }
@@ -895,15 +958,32 @@
         </div>
     </section>
 
+    <!-- ===== 编辑/添加模态框（带输入建议） ===== -->
     <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true">
         <div class="modal-box">
             <h3 id="modalTitle">编辑</h3>
-            <label for="modalProductName" id="modalNameLabel">名称 *</label>
-            <input type="text" id="modalProductName" placeholder="请输入..." inputmode="text" autocomplete="off" />
-            <label for="modalLocation" id="modalPriceLabel" style="display:none;">价格</label>
-            <input type="text" id="modalLocation" placeholder="例如：25.00" inputmode="decimal" style="display:none;" autocomplete="off" />
-            <label for="modalNote" id="modalNoteLabel" style="display:none;">备注</label>
-            <textarea id="modalNote" placeholder="补充说明..." style="display:none;"></textarea>
+
+            <div class="form-field" id="nameField">
+                <label for="modalProductName" id="modalNameLabel">名称 *</label>
+                <div class="input-suggest-wrap">
+                    <input type="text" id="modalProductName" placeholder="请输入..." inputmode="text" autocomplete="off" />
+                    <div class="input-suggestions" id="nameSuggestions"></div>
+                </div>
+            </div>
+
+            <div class="form-field" id="priceField" style="display:none;">
+                <label for="modalLocation" id="modalPriceLabel">价格</label>
+                <div class="input-suggest-wrap">
+                    <input type="text" id="modalLocation" placeholder="例如：25.00" inputmode="decimal" autocomplete="off" />
+                    <div class="input-suggestions" id="priceSuggestions"></div>
+                </div>
+            </div>
+
+            <div class="form-field" id="noteField" style="display:none;">
+                <label for="modalNote" id="modalNoteLabel">备注</label>
+                <textarea id="modalNote" placeholder="补充说明..."></textarea>
+            </div>
+
             <div class="modal-actions">
                 <button class="btn" id="modalCancel">取消</button>
                 <button class="btn btn-primary" id="modalConfirm">确认</button>
@@ -952,7 +1032,7 @@
 
         function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
 
-        // 按 26 英文字母顺序排序（不区分大小写，不做拼音转换）
+        // 按 26 英文字母顺序排序（不区分大小写）
         function compareNames(a, b) {
             const sa = String(a == null ? '' : a).toLowerCase();
             const sb = String(b == null ? '' : b).toLowerCase();
@@ -974,8 +1054,8 @@
         const DEFAULT_DATA = [];
         let data = [];
         let selectedCustomerId = null;
-        let selectedMaterial = null;   // 材料模式当前选中的材料名
-        let mode = 'customer';          // 'customer' | 'material'
+        let selectedMaterial = null;
+        let mode = 'customer';
         let globalSearchTerm = '';
         let deleteContext = { id: null, name: '' };
         let archiveContext = { id: null };
@@ -1021,7 +1101,6 @@
             return '未知';
         }
 
-        // 提取所有材料名（去重，按 A-Z 排序）
         function getAllMaterials() {
             const set = new Set();
             for (const c of data) {
@@ -1034,7 +1113,22 @@
             return Array.from(set).sort(compareNames);
         }
 
-        // 反查：拥有该材料的所有客户（按客户名排序）
+        function getAllCustomerNames() {
+            return [...new Set(data.map(c => c.name).filter(Boolean))].sort(compareNames);
+        }
+
+        function getAllPrices() {
+            const set = new Set();
+            for (const c of data) {
+                if (c.items) {
+                    for (const item of c.items) {
+                        if (item.location) set.add(item.location);
+                    }
+                }
+            }
+            return Array.from(set).sort(compareNames);
+        }
+
         function getCustomersByMaterial(materialName) {
             const results = [];
             for (const c of data) {
@@ -1164,7 +1258,6 @@
 
         function autoSelectFirst() {
             if (data.length > 0) {
-                // 按 A-Z 排序后取第一个
                 const sorted = [...data].sort((a, b) => compareNames(a.name, b.name));
                 selectedCustomerId = sorted[0].id;
             } else {
@@ -1176,7 +1269,6 @@
         //  渲染
         // ================================================================
 
-        // ---- 客户下拉框（按 A-Z 排序）----
         function renderCustomerSelect() {
             const select = document.getElementById('customerSelect');
             const sorted = [...data].sort((a, b) => compareNames(a.name, b.name));
@@ -1197,7 +1289,6 @@
             document.getElementById('deleteCustomerBtn').style.display = show ? 'inline-flex' : 'none';
         }
 
-        // ---- 材料下拉框（按 A-Z 排序）----
         function renderMaterialSelect() {
             const select = document.getElementById('materialSelect');
             const materials = getAllMaterials();
@@ -1214,7 +1305,6 @@
             }
         }
 
-        // ---- 路径显示 ----
         function updatePathDisplay() {
             const pathEl = document.getElementById('pathDisplay');
             const pathLabel = document.getElementById('pathLabel');
@@ -1240,7 +1330,6 @@
             }
         }
 
-        // ---- 标题 ----
         function updateInfoTitle() {
             const el = document.getElementById('infoTitle');
             if (globalSearchTerm.trim()) {
@@ -1252,7 +1341,6 @@
             }
         }
 
-        // ---- 主渲染入口 ----
         function renderMainList() {
             const container = document.getElementById('infoItems');
             const countEl = document.getElementById('itemCount');
@@ -1269,7 +1357,6 @@
             renderPriceItems(container, countEl);
         }
 
-        // ---- 客户模式：价格清单（按材料名排序）----
         function renderPriceItems(container, countEl) {
             const customer = selectedCustomerId ? getCustomerById(selectedCustomerId) : null;
             if (!customer) {
@@ -1307,7 +1394,6 @@
             bindPriceActions();
         }
 
-        // ---- 材料模式：材料报价清单 ----
         function renderMaterialResults(container, countEl) {
             if (!selectedMaterial) {
                 container.innerHTML = `<div class="info-empty">← 请选择材料查看报价</div>`;
@@ -1363,7 +1449,6 @@
             });
         }
 
-        // ---- 全局搜索结果 ----
         function renderSearchResults(container, countEl, searchTerm) {
             const results = performGlobalSearch(searchTerm);
             if (results.length === 0) {
@@ -1441,7 +1526,6 @@
             return escapeHtml(text).replace(regex, '<span class="highlight">$1</span>');
         }
 
-        // ---- 全局搜索 ----
         function performGlobalSearch(term) {
             const trimmed = term.trim().toLowerCase();
             const results = [];
@@ -1516,7 +1600,6 @@
             document.getElementById('searchSuggestions').classList.remove('active');
         }
 
-        // ---- 导航 ----
         function navigateTo(type, id) {
             if (type === 'customer') {
                 mode = 'customer';
@@ -1552,7 +1635,6 @@
             }
         }
 
-        // ---- 从材料模式跳回客户模式 ----
         function jumpToCustomer(customerId, materialName) {
             mode = 'customer';
             selectedCustomerId = customerId;
@@ -1577,10 +1659,8 @@
             showToast('✅ 已跳转到客户：' + getItemNameById('customer', customerId));
         }
 
-        // ---- 全量渲染 ----
         function renderAll() {
             scheduleRender(() => {
-                // 模式 UI 显隐
                 const toggle = document.getElementById('modeToggle');
                 const customerSelect = document.getElementById('customerSelect');
                 const materialSelect = document.getElementById('materialSelect');
@@ -1613,7 +1693,6 @@
         function setMode(newMode) {
             if (mode === newMode) return;
             mode = newMode;
-            // 保留搜索词（不清空 globalSearchTerm）
             renderAll();
             showToast(newMode === 'material' ? '🔀 已切换到材料模式' : '🔀 已切换到客户模式');
         }
@@ -1641,7 +1720,6 @@
                 return;
             }
             selectedMaterial = value;
-            // 选择材料时清空搜索，以便显示材料结果
             globalSearchTerm = '';
             document.getElementById('globalSearch').value = '';
             closeSuggestions();
@@ -1742,6 +1820,116 @@
         }
 
         // ================================================================
+        //  输入建议（模糊筛选）
+        // ================================================================
+
+        // 模糊筛选：优先前缀匹配，再按 A-Z 排序
+        function fuzzyFilter(query, list) {
+            if (!query || !query.trim()) return [];
+            const q = query.trim().toLowerCase();
+            const matches = list.filter(item => item.toLowerCase().includes(q));
+            matches.sort((a, b) => {
+                const aStarts = a.toLowerCase().startsWith(q);
+                const bStarts = b.toLowerCase().startsWith(q);
+                if (aStarts !== bStarts) return aStarts ? -1 : 1;
+                return compareNames(a, b);
+            });
+            return matches.slice(0, 12);
+        }
+
+        function getCurrentNameSource() {
+            if (editContext.type === 'customer') {
+                return getAllCustomerNames();
+            }
+            return getAllMaterials();
+        }
+
+        function getCurrentPriceSource() {
+            return getAllPrices();
+        }
+
+        function renderInputSuggestions(inputEl, containerEl, sourceList) {
+            const query = inputEl.value;
+            if (!query || !query.trim()) {
+                containerEl.classList.remove('active');
+                containerEl.innerHTML = '';
+                return;
+            }
+            const matches = fuzzyFilter(query, sourceList);
+            if (matches.length === 0) {
+                containerEl.classList.remove('active');
+                containerEl.innerHTML = '';
+                return;
+            }
+            const q = query.trim().toLowerCase();
+            let html = '';
+            for (const m of matches) {
+                const idx = m.toLowerCase().indexOf(q);
+                let display;
+                if (idx >= 0) {
+                    display = escapeHtml(m.slice(0, idx))
+                        + '<span class="sug-match">' + escapeHtml(m.slice(idx, idx + q.length)) + '</span>'
+                        + escapeHtml(m.slice(idx + q.length));
+                } else {
+                    display = escapeHtml(m);
+                }
+                html += `<div class="sug-item" data-value="${escapeAttr(m)}">${display}</div>`;
+            }
+            containerEl.innerHTML = html;
+            containerEl.classList.add('active');
+
+            containerEl.querySelectorAll('.sug-item').forEach(el => {
+                // pointerdown 兼容触屏 + 鼠标，避免 blur 抢先
+                el.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    inputEl.value = el.dataset.value;
+                    containerEl.classList.remove('active');
+                    containerEl.innerHTML = '';
+                    // 触发一次 input 以便联动
+                    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+                });
+            });
+        }
+
+        function setupModalSuggestions() {
+            const nameInput = document.getElementById('modalProductName');
+            const nameContainer = document.getElementById('nameSuggestions');
+            const priceInput = document.getElementById('modalLocation');
+            const priceContainer = document.getElementById('priceSuggestions');
+
+            nameInput.addEventListener('input', () => {
+                renderInputSuggestions(nameInput, nameContainer, getCurrentNameSource());
+            });
+            nameInput.addEventListener('focus', () => {
+                if (nameInput.value.trim()) {
+                    renderInputSuggestions(nameInput, nameContainer, getCurrentNameSource());
+                }
+            });
+            nameInput.addEventListener('blur', () => {
+                setTimeout(() => nameContainer.classList.remove('active'), 150);
+            });
+
+            priceInput.addEventListener('input', () => {
+                renderInputSuggestions(priceInput, priceContainer, getCurrentPriceSource());
+            });
+            priceInput.addEventListener('focus', () => {
+                if (priceInput.value.trim()) {
+                    renderInputSuggestions(priceInput, priceContainer, getCurrentPriceSource());
+                }
+            });
+            priceInput.addEventListener('blur', () => {
+                setTimeout(() => priceContainer.classList.remove('active'), 150);
+            });
+        }
+
+        function clearModalSuggestions() {
+            const nameContainer = document.getElementById('nameSuggestions');
+            const priceContainer = document.getElementById('priceSuggestions');
+            if (nameContainer) { nameContainer.classList.remove('active'); nameContainer.innerHTML = ''; }
+            if (priceContainer) { priceContainer.classList.remove('active'); priceContainer.innerHTML = ''; }
+        }
+
+        // ================================================================
         //  模态框
         // ================================================================
         function showDeleteModal(type, id, name) {
@@ -1830,12 +2018,13 @@
             const nameLabel = document.getElementById('modalNameLabel');
             const priceLabel = document.getElementById('modalPriceLabel');
             const noteLabel = document.getElementById('modalNoteLabel');
+            const priceField = document.getElementById('priceField');
+            const noteField = document.getElementById('noteField');
 
             [nameInput, locInput, noteInput].forEach(el => el.value = '');
-            locInput.style.display = 'none';
-            priceLabel.style.display = 'none';
-            noteInput.style.display = 'none';
-            noteLabel.style.display = 'none';
+            clearModalSuggestions();
+            priceField.style.display = 'none';
+            noteField.style.display = 'none';
 
             if (type === 'customer') {
                 const node = getCustomerById(id);
@@ -1862,10 +2051,8 @@
             nameInput.value = item.name || '';
             locInput.value = item.location || '';
             noteInput.value = item.note || '';
-            locInput.style.display = 'block';
-            priceLabel.style.display = 'block';
-            noteInput.style.display = 'block';
-            noteLabel.style.display = 'block';
+            priceField.style.display = 'block';
+            noteField.style.display = 'block';
             overlay.classList.add('active');
             nameInput.focus();
             nameInput.select();
@@ -1885,12 +2072,13 @@
             const nameLabel = document.getElementById('modalNameLabel');
             const priceLabel = document.getElementById('modalPriceLabel');
             const noteLabel = document.getElementById('modalNoteLabel');
+            const priceField = document.getElementById('priceField');
+            const noteField = document.getElementById('noteField');
 
             [nameInput, locInput, noteInput].forEach(el => el.value = '');
-            locInput.style.display = 'none';
-            priceLabel.style.display = 'none';
-            noteInput.style.display = 'none';
-            noteLabel.style.display = 'none';
+            clearModalSuggestions();
+            priceField.style.display = 'none';
+            noteField.style.display = 'none';
 
             if (type === 'customer') {
                 title.textContent = '➕ 添加客户';
@@ -1908,10 +2096,8 @@
             nameLabel.textContent = '材料名称 *';
             priceLabel.textContent = '价格';
             noteLabel.textContent = '备注';
-            locInput.style.display = 'block';
-            priceLabel.style.display = 'block';
-            noteInput.style.display = 'block';
-            noteLabel.style.display = 'block';
+            priceField.style.display = 'block';
+            noteField.style.display = 'block';
             overlay.classList.add('active');
             nameInput.focus();
 
@@ -1928,16 +2114,21 @@
         }
 
         document.getElementById('modalCancel').addEventListener('click', () => {
+            clearModalSuggestions();
             document.getElementById('modalOverlay').classList.remove('active');
         });
         document.getElementById('modalOverlay').addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) document.getElementById('modalOverlay').classList.remove('active');
+            if (e.target === e.currentTarget) {
+                clearModalSuggestions();
+                document.getElementById('modalOverlay').classList.remove('active');
+            }
         });
         document.getElementById('modalConfirm').addEventListener('click', () => {
             const nameInput = document.getElementById('modalProductName');
             const locInput = document.getElementById('modalLocation');
             const noteInput = document.getElementById('modalNote');
             const type = editContext.type;
+            clearModalSuggestions();
             if (type === 'customer') {
                 const val = nameInput.value.trim();
                 if (!val) { showToast('⚠️ 名称不能为空'); return; }
@@ -1953,7 +2144,21 @@
             document.getElementById('modalOverlay').classList.remove('active');
         });
         document.getElementById('modalProductName').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') document.getElementById('modalConfirm').click();
+            if (e.key === 'Enter') {
+                // 若建议框打开，选第一条
+                const container = document.getElementById('nameSuggestions');
+                if (container.classList.contains('active')) {
+                    const first = container.querySelector('.sug-item');
+                    if (first) {
+                        e.preventDefault();
+                        document.getElementById('modalProductName').value = first.dataset.value;
+                        container.classList.remove('active');
+                        container.innerHTML = '';
+                        return;
+                    }
+                }
+                document.getElementById('modalConfirm').click();
+            }
         });
         document.getElementById('modalLocation').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') document.getElementById('modalConfirm').click();
@@ -2051,6 +2256,7 @@
                 data = deepClone(DEFAULT_DATA);
             }
             autoSelectFirst();
+            setupModalSuggestions();
             renderAll();
         }
 
@@ -2060,7 +2266,7 @@
             init();
         }
 
-        console.log('📋 客户专属价格表 v5 · 客户/材料双模式 + A-Z 排序');
+        console.log('📋 客户专属价格表 v6 · 双模式 + A-Z + 输入建议');
     </script>
 </body>
 </html>
