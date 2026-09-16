@@ -63,7 +63,7 @@
             color: var(--text-secondary);
             -webkit-text-fill-color: var(--text-secondary);
         }
-        .header-actions { display: flex; gap: 4px; margin-left: auto; }
+        .header-actions { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
         .header-actions .btn { padding: 4px 10px; font-size: 12px; min-height: 32px; min-width: 32px; border-radius: 8px; }
 
         .btn {
@@ -312,7 +312,7 @@
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        .modal-box .sub-text { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; line-height: 1.5; }
+        .modal-box .sub-text { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; line-height: 1.6; }
         .modal-box label {
             display: block; font-size: 12px; font-weight: 500;
             color: var(--text-secondary); margin-bottom: 3px;
@@ -411,6 +411,40 @@
             font-weight: 600; color: var(--text-primary); word-break: break-all;
         }
 
+        /* ===== 拼音库管理面板 ===== */
+        .pinyin-status-box {
+            background: var(--secondary-bg);
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin: 10px 0 12px;
+            border: 1px solid var(--border-color);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .pinyin-status-box .status-line {
+            display: flex; align-items: center; gap: 6px;
+            margin-bottom: 4px;
+        }
+        .pinyin-status-box .status-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--error); flex-shrink: 0;
+        }
+        .pinyin-status-box .status-dot.ok { background: var(--success); }
+        .pinyin-status-box .status-dot.warn { background: var(--warning); }
+        .pinyin-status-box .status-tip {
+            color: var(--text-muted); font-size: 11px;
+            margin-top: 6px; line-height: 1.5;
+        }
+        .pinyin-actions {
+            display: flex; flex-direction: column;
+            gap: 8px; margin-top: 4px;
+        }
+        .pinyin-actions .btn {
+            justify-content: center;
+            min-height: 42px;
+            width: 100%;
+        }
+
         .toast-msg {
             position: fixed; bottom: 30px; left: 50%;
             transform: translateX(-50%) translateZ(0);
@@ -483,6 +517,7 @@
         <div class="header-actions">
             <button class="btn btn-success" id="saveBtn">💾 保存</button>
             <button class="btn btn-primary" id="loadBtn">📂 加载</button>
+            <button class="btn" id="pinyinManageBtn" title="拼音库管理">📥 拼音库</button>
             <button class="btn btn-danger" id="resetBtn">↺</button>
         </div>
     </header>
@@ -587,22 +622,29 @@
         </div>
     </div>
 
-    <!-- 拼音库加载失败模态框（新增） -->
-    <div class="modal-overlay" id="pinyinErrorModal" role="dialog" aria-modal="true">
+    <!-- 拼音库管理面板（新增 / 替换原错误弹窗） -->
+    <div class="modal-overlay" id="pinyinModal" role="dialog" aria-modal="true">
         <div class="modal-box">
-            <h3>⚠️ 拼音库未加载</h3>
+            <h3>📥 拼音库管理</h3>
             <p class="sub-text">
-                未能自动加载 <b>pinyin-pro.min.js</b>，拼音输入建议暂不可用。<br>
-                其他功能不受影响，可正常使用。
+                拼音库用于支持输入 <b>拼音/首字母</b> 快速查找客户与材料。<br>
+                未加载时仍可正常使用其他功能（仅拼音匹配不可用）。
             </p>
-            <p class="sub-text" style="margin-top:8px; color: var(--text-muted); font-size: 12px;">
-                建议操作：先点击“下载”，再将文件 <b>pinyin-pro.min.js</b> 放到本网页所在目录，刷新页面即可离线使用。<br>
-                或直接选择本地已有的 js 文件加载。
-            </p>
-            <div class="modal-actions" style="flex-direction:column; align-items:stretch; gap:8px; margin-top:14px;">
+
+            <div class="pinyin-status-box" id="pinyinStatusBox">
+                <div class="status-line">
+                    <span class="status-dot" id="pinyinStatusDot"></span>
+                    <span id="pinyinStatusText">正在检测...</span>
+                </div>
+                <div class="status-tip" id="pinyinStatusTip">
+                    建议下载到本地，可离线使用。
+                </div>
+            </div>
+
+            <div class="pinyin-actions">
                 <button class="btn btn-primary" id="pinyinDownloadBtn">📥 下载 pinyin-pro.min.js</button>
                 <button class="btn btn-success" id="pinyinManualBtn">📁 选择本地文件加载</button>
-                <button class="btn" id="pinyinSkipBtn">跳过（不影响其他功能）</button>
+                <button class="btn" id="pinyinCloseBtn">关闭</button>
             </div>
         </div>
     </div>
@@ -611,7 +653,7 @@
     <input type="file" id="pinyinFileInput" accept=".js,application/javascript,text/javascript" />
 
     <!-- ================================================================
-         pinyin-pro 加载器（独立脚本，优先本地 → CDN → 手动）
+         pinyin-pro 加载器（手动下载版，无自动下载）
          ================================================================ -->
     <script>
     (function () {
@@ -622,6 +664,7 @@
         ];
 
         let pinyinReady = false;
+        let pinyinSource = '';   // 'local' | 'cdn' | ''
         let loadCallbacks = [];
 
         function onPinyinReady(fn) {
@@ -635,7 +678,6 @@
             const cbs = loadCallbacks;
             loadCallbacks = [];
             cbs.forEach(fn => { try { fn(); } catch (e) { console.warn(e); } });
-            // 让主脚本重新渲染，使拼音建议立即生效
             if (typeof window.__onPinyinReady === 'function') {
                 try { window.__onPinyinReady(); } catch (e) {}
             }
@@ -665,14 +707,17 @@
             console.log('[toast]', msg);
         }
 
-        // 尝试从 CDN 下载 pinyin-pro.min.js 到本地
-        function downloadPinyinFile(url, silent) {
-            const urls = url ? [url] : CDN_URLS.slice();
+        // ===== 手动下载（仅用户点击按钮时调用） =====
+        function downloadPinyinFile() {
+            const urls = CDN_URLS.slice();
             let idx = 0;
+            safeToast('⏳ 正在下载...');
+            setStatus('loading', '正在下载...', '请稍候');
 
             function tryNext() {
                 if (idx >= urls.length) {
-                    if (!silent) safeToast('❌ 下载失败，请检查网络');
+                    safeToast('❌ 下载失败，请检查网络');
+                    updateStatusText();
                     return;
                 }
                 const u = urls[idx++];
@@ -690,14 +735,15 @@
                         a.click();
                         document.body.removeChild(a);
                         setTimeout(() => URL.revokeObjectURL(objUrl), 3000);
-                        safeToast('📥 已下载，请放到本网页同目录');
+                        safeToast('📥 下载完成，请放到本网页同目录');
+                        updateStatusText();
                     })
                     .catch(() => tryNext());
             }
             tryNext();
         }
 
-        // 手动加载本地文件
+        // ===== 手动加载本地文件 =====
         function loadFromFile(file) {
             const reader = new FileReader();
             reader.onload = function (e) {
@@ -709,8 +755,8 @@
                     s.onload = function () {
                         if (checkPinyin()) {
                             safeToast('✅ 拼音库加载成功');
-                            const modal = document.getElementById('pinyinErrorModal');
-                            if (modal) modal.classList.remove('active');
+                            pinyinSource = 'local';
+                            updateStatusText();
                             notifyReady();
                         } else {
                             safeToast('❌ 文件无效，未检测到 pinyinPro');
@@ -729,62 +775,61 @@
             reader.readAsText(file);
         }
 
-        function showPinyinError() {
-            const modal = document.getElementById('pinyinErrorModal');
-            if (modal) modal.classList.add('active');
+        // ===== 状态显示 =====
+        function setStatus(state, text, tip) {
+            const dot = document.getElementById('pinyinStatusDot');
+            const txt = document.getElementById('pinyinStatusText');
+            const tipEl = document.getElementById('pinyinStatusTip');
+            if (dot) {
+                dot.className = 'status-dot' + (state === 'ok' ? ' ok' : (state === 'warn' ? ' warn' : ''));
+            }
+            if (txt) txt.textContent = text;
+            if (tipEl && tip) tipEl.textContent = tip;
         }
 
-        async function init() {
-            // 1. 尝试加载本地
-            try {
-                await loadScript(LOCAL_FILE);
-                if (checkPinyin()) {
-                    console.log('✅ 使用本地 pinyin-pro');
-                    notifyReady();
-                    return;
-                }
-            } catch (e) {
-                console.log('⚠️ 本地未找到 pinyin-pro');
+        function updateStatusText() {
+            if (!pinyinReady) {
+                setStatus('error', '未加载', '拼音输入建议暂不可用。可点击下方按钮下载到本地或手动加载。');
+                return;
             }
-
-            // 2. 依次尝试 CDN
-            for (const url of CDN_URLS) {
-                try {
-                    await loadScript(url);
-                    if (checkPinyin()) {
-                        console.log('✅ 已从 CDN 加载 pinyin-pro:', url);
-                        // 触发下载到本地（静默）
-                        downloadPinyinFile(url, true);
-                        notifyReady();
-                        return;
-                    }
-                } catch (e) {
-                    console.log('⚠️ CDN 加载失败:', url);
-                }
+            if (pinyinSource === 'local') {
+                setStatus('ok', '已加载（本地文件）', '拼音建议已生效，可离线使用。');
+            } else if (pinyinSource === 'cdn') {
+                setStatus('warn', '已加载（CDN 在线）', '建议下载 pinyin-pro.min.js 到网页同目录，可离线使用。');
+            } else {
+                setStatus('ok', '已加载', '');
             }
-
-            // 3. 全部失败 → 弹窗
-            console.warn('❌ pinyin-pro 加载失败');
-            showPinyinError();
         }
 
-        // 绑定模态框按钮
+        // ===== 打开 / 关闭管理面板 =====
+        function openPinyinModal() {
+            const modal = document.getElementById('pinyinModal');
+            if (modal) {
+                updateStatusText();
+                modal.classList.add('active');
+            }
+        }
+        function closePinyinModal() {
+            const modal = document.getElementById('pinyinModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        // ===== 绑定 UI =====
         function bindUI() {
+            const manageBtn = document.getElementById('pinyinManageBtn');
+            const modal = document.getElementById('pinyinModal');
             const downloadBtn = document.getElementById('pinyinDownloadBtn');
             const manualBtn = document.getElementById('pinyinManualBtn');
-            const skipBtn = document.getElementById('pinyinSkipBtn');
+            const closeBtn = document.getElementById('pinyinCloseBtn');
             const fileInput = document.getElementById('pinyinFileInput');
 
-            if (downloadBtn) {
-                downloadBtn.addEventListener('click', () => downloadPinyinFile(null, false));
-            }
-            if (manualBtn && fileInput) {
-                manualBtn.addEventListener('click', () => fileInput.click());
-            }
-            if (skipBtn) {
-                skipBtn.addEventListener('click', () => {
-                    const modal = document.getElementById('pinyinErrorModal');
-                    if (modal) modal.classList.remove('active');
+            if (manageBtn) manageBtn.addEventListener('click', openPinyinModal);
+            if (downloadBtn) downloadBtn.addEventListener('click', downloadPinyinFile);
+            if (manualBtn && fileInput) manualBtn.addEventListener('click', () => fileInput.click());
+            if (closeBtn) closeBtn.addEventListener('click', closePinyinModal);
+            if (modal) {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) closePinyinModal();
                 });
             }
             if (fileInput) {
@@ -797,13 +842,45 @@
             }
         }
 
-        // 暴露给外部
-        window.PinyinLoader = {
-            isReady: () => pinyinReady,
-            onReady: onPinyinReady
-        };
+        // ===== 初始化加载流程（不再自动下载） =====
+        async function init() {
+            // 1. 尝试加载本地
+            try {
+                await loadScript(LOCAL_FILE);
+                if (checkPinyin()) {
+                    console.log('✅ 使用本地 pinyin-pro');
+                    pinyinSource = 'local';
+                    notifyReady();
+                    // 若管理面板正开着，刷新状态
+                    updateStatusText();
+                    return;
+                }
+            } catch (e) {
+                console.log('⚠️ 本地未找到 pinyin-pro');
+            }
 
-        // 启动
+            // 2. 依次尝试 CDN
+            for (const url of CDN_URLS) {
+                try {
+                    await loadScript(url);
+                    if (checkPinyin()) {
+                        console.log('✅ 已从 CDN 加载 pinyin-pro:', url);
+                        pinyinSource = 'cdn';
+                        // 关键：不再自动下载
+                        notifyReady();
+                        updateStatusText();
+                        return;
+                    }
+                } catch (e) {
+                    console.log('⚠️ CDN 加载失败:', url);
+                }
+            }
+
+            // 3. 全部失败 → 打开管理面板，让用户手动下载/加载
+            console.warn('❌ pinyin-pro 加载失败');
+            setTimeout(openPinyinModal, 400);
+        }
+
         function start() {
             bindUI();
             init();
@@ -849,14 +926,13 @@
         }
         function escapeAttr(str) { return escapeHtml(str); }
 
-        // ===== 拼音工具（使用 pinyin-pro，无 pinyin-pro 时降级） =====
+        // ===== 拼音工具 =====
         function hasPinyinPro() {
             return typeof window.pinyinPro !== 'undefined'
                 && window.pinyinPro
                 && typeof window.pinyinPro.pinyin === 'function';
         }
 
-        // 转成拼音（无音调，小写）
         function toPinyin(str) {
             if (!str) return '';
             const s = String(str);
@@ -867,12 +943,11 @@
                         type: 'array',
                         nonZh: 'consecutive'
                     }).join('').toLowerCase();
-                } catch (e) { /* 降级 */ }
+                } catch (e) {}
             }
             return s.toLowerCase();
         }
 
-        // 取首字母（如 袁天 → yt）
         function toInitials(str) {
             if (!str) return '';
             const s = String(str);
@@ -884,7 +959,7 @@
                         nonZh: 'consecutive'
                     });
                     return arr.map(p => (p.charAt(0) || '')).join('').toLowerCase();
-                } catch (e) { /* 降级 */ }
+                } catch (e) {}
             }
             return s.toLowerCase();
         }
@@ -917,11 +992,8 @@
             }
         }
 
-        // 拼音库就绪后回调
         window.__onPinyinReady = function () {
-            // 若弹窗开着就重新渲染一次（比如用户正在输入）
             try { renderAll(); } catch (e) {}
-            // 若编辑框打开，重新渲染一次建议
             try {
                 const nameInput = document.getElementById('modalProductName');
                 const nameContainer = document.getElementById('nameSuggestions');
@@ -1569,13 +1641,6 @@
         //  输入建议（含 pinyin-pro 拼音匹配）
         // ================================================================
 
-        // 判断是否 ASCII
-        function isAsciiQuery(str) {
-            return /^[a-zA-Z0-9\s\-_.]*$/.test(str);
-        }
-
-        // 计算匹配分数（越小越靠前），-1 表示不匹配
-        // 返回 { score, type } 或 null
         function scoreMatch(item, q) {
             const s = String(item);
             const lower = s.toLowerCase();
@@ -1602,7 +1667,7 @@
                         insensitive: true
                     });
                     if (m && m.length > 0) return { score: 4, type: 'py-mixed' };
-                } catch (e) { /* ignore */ }
+                } catch (e) {}
             }
 
             return null;
@@ -1671,7 +1736,6 @@
                     const pyFull = toPinyin(item);
                     if (pyFull) pyHint = `<span class="sug-py-hint">${escapeHtml(pyFull)}</span>`;
                 } else {
-                    // py-prefix / py-contain
                     pyTag = '<span class="sug-py-tag">拼音</span>';
                     const pyFull = toPinyin(item);
                     if (pyFull) pyHint = `<span class="sug-py-hint">${escapeHtml(pyFull)}</span>`;
@@ -1978,7 +2042,6 @@
                 setTimeout(() => div.remove(), 300);
             }, 2200);
         }
-        // 暴露到 window，供 pinyin loader 调用
         window.showToast = showToast;
 
         // ================================================================
@@ -2050,7 +2113,7 @@
             init();
         }
 
-        console.log('📋 客户专属价格表 v9 · 双模式 + 拼音排序 + pinyin-pro 智能输入建议');
+        console.log('📋 客户专属价格表 v10 · 双模式 + 拼音排序 + 手动拼音库管理');
     </script>
 </body>
 </html>
