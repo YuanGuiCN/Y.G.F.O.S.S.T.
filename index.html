@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover" />
     <title>客户专属价格表</title>
     <style>
-        /* ===== 紫蓝色系（保留原配色） ===== */
         :root {
             --primary-bg: #0b0d1a;
             --secondary-bg: #14162e;
@@ -33,7 +32,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* ===== 全局字体：仿宋（跨平台兼容） ===== */
         body,
         input,
         select,
@@ -266,7 +264,7 @@
             font-size: 14px;
         }
 
-        /* ===== 客户下拉框 ===== */
+        /* ===== 客户/材料 选择器 ===== */
         .customer-selector {
             display: flex;
             flex-wrap: wrap;
@@ -278,13 +276,33 @@
             margin-bottom: 8px;
             align-items: center;
         }
-        .customer-selector label {
+        .customer-selector .mode-toggle {
             font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.2px;
+            font-weight: 700;
+            color: var(--purple-light);
+            background: rgba(168, 85, 247, 0.12);
+            border: 1px solid rgba(168, 85, 247, 0.35);
+            letter-spacing: 0.5px;
             white-space: nowrap;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 8px;
+            transition: background 0.15s, transform 0.12s;
+            font-family: inherit;
+            min-height: 32px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            touch-action: manipulation;
+        }
+        .customer-selector .mode-toggle::after {
+            content: "⇄";
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        .customer-selector .mode-toggle:active {
+            background: rgba(168, 85, 247, 0.28);
+            transform: scale(0.95);
         }
         .customer-selector select {
             flex: 1;
@@ -305,6 +323,7 @@
             padding-right: 32px;
             cursor: pointer;
             transition: border-color 0.2s;
+            min-width: 0;
         }
         .customer-selector select:focus {
             border-color: var(--purple);
@@ -328,9 +347,6 @@
         }
         .customer-selector .actions .btn-icon:active {
             opacity: 1;
-        }
-        .customer-selector .actions .btn-icon.active-action {
-            opacity: 0.9;
         }
         .customer-selector .add-btn {
             flex-shrink: 0;
@@ -394,7 +410,7 @@
             align-items: center;
         }
 
-        /* ===== 价格清单 ===== */
+        /* ===== 清单 ===== */
         .info-section {
             background: var(--card-bg);
             border-radius: var(--radius);
@@ -421,7 +437,6 @@
             color: var(--text-muted);
         }
 
-        /* ===== 价格清单滚动容器 ===== */
         .info-items {
             display: flex;
             flex-direction: column;
@@ -505,6 +520,102 @@
             color: var(--purple-light);
         }
 
+        /* ===== 材料报价结果卡 ===== */
+        .material-result-card {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 4px;
+            padding: 10px 12px;
+        }
+        .material-result-card.has-duplicate {
+            border-color: var(--warning);
+            box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.25);
+        }
+        .material-result-card .card-main {
+            width: 100%;
+            min-width: 0;
+        }
+        .material-result-card .customer-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .duplicate-warning {
+            font-size: 11px;
+            color: var(--warning);
+            font-weight: 600;
+            margin-top: 3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .material-price-list {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            margin-top: 6px;
+        }
+        .material-price-row {
+            display: flex;
+            gap: 8px;
+            align-items: baseline;
+            flex-wrap: wrap;
+            font-size: 13px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 2px solid transparent;
+        }
+        .material-price-row .mp-price {
+            font-weight: 700;
+            color: inherit;
+        }
+        .material-price-row .mp-price::before {
+            content: "¥";
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-right: 1px;
+        }
+        .material-price-row .mp-note {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        .material-price-row.alt-color-0 {
+            color: var(--purple-light);
+            border-left-color: var(--purple);
+        }
+        .material-price-row.alt-color-1 {
+            color: var(--blue-light);
+            border-left-color: var(--blue);
+        }
+        .material-price-row.alt-color-2 {
+            color: var(--success);
+            border-left-color: var(--success);
+        }
+        .material-result-card .card-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 6px;
+        }
+        .jump-link {
+            font-size: 12px;
+            color: var(--purple-light);
+            text-decoration: none;
+            padding: 5px 12px;
+            border-radius: 8px;
+            background: rgba(168, 85, 247, 0.12);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            cursor: pointer;
+            transition: background 0.12s, transform 0.12s;
+            font-weight: 600;
+            touch-action: manipulation;
+        }
+        .jump-link:active {
+            background: rgba(168, 85, 247, 0.3);
+            transform: scale(0.95);
+        }
+
         /* ===== 模态框 ===== */
         .modal-overlay {
             display: none;
@@ -524,12 +635,8 @@
             display: flex;
         }
         @keyframes modalFadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         .modal-box {
             background: var(--card-bg);
@@ -543,14 +650,8 @@
             transform: translateZ(0);
         }
         @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: scale(0.92) translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
+            from { opacity: 0; transform: scale(0.92) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
         .modal-box h3 {
             font-size: 18px;
@@ -611,7 +712,6 @@
             min-height: var(--touch-target);
         }
 
-        /* 删除模态框 */
         .delete-modal .modal-box .delete-options {
             display: flex;
             flex-direction: column;
@@ -646,7 +746,6 @@
             word-break: break-all;
         }
 
-        /* Toast */
         .toast-msg {
             position: fixed;
             bottom: 30px;
@@ -669,24 +768,12 @@
             will-change: opacity;
         }
 
-        #fileInput {
-            display: none;
-        }
+        #fileInput { display: none; }
 
-        /* 滚动条 */
-        ::-webkit-scrollbar {
-            width: 3px;
-            height: 3px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--secondary-bg);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--accent-gradient);
-            border-radius: 3px;
-        }
+        ::-webkit-scrollbar { width: 3px; height: 3px; }
+        ::-webkit-scrollbar-track { background: var(--secondary-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-gradient); border-radius: 3px; }
 
-        /* 安全区域 */
         @supports (padding: max(0px)) {
             body {
                 padding-left: max(8px, env(safe-area-inset-left));
@@ -695,14 +782,9 @@
             }
         }
 
-        /* 响应式 */
         @media (max-width: 480px) {
-            .app-header .brand {
-                font-size: 16px;
-            }
-            .app-header .brand small {
-                font-size: 10px;
-            }
+            .app-header .brand { font-size: 16px; }
+            .app-header .brand small { font-size: 10px; }
             .search-wrapper input {
                 font-size: 15px;
                 padding: 8px 14px;
@@ -717,27 +799,22 @@
                 min-height: 32px;
                 font-size: 13px;
             }
+            .customer-selector .mode-toggle {
+                align-self: flex-start;
+            }
             .customer-selector .actions {
                 justify-content: flex-end;
             }
-            .price-card .material-name {
-                font-size: 14px;
-            }
-            .price-card .price-value {
-                font-size: 13px;
-            }
-            .modal-box {
-                padding: 16px 12px;
-            }
+            .price-card .material-name { font-size: 14px; }
+            .price-card .price-value { font-size: 13px; }
+            .modal-box { padding: 16px 12px; }
             .btn {
                 font-size: 12px;
                 padding: 4px 8px;
                 min-height: 32px;
                 min-width: 32px;
             }
-            .info-items {
-                max-height: 300px;
-            }
+            .info-items { max-height: 300px; }
         }
         @media (max-width: 380px) {
             .app-header {
@@ -745,59 +822,33 @@
                 align-items: stretch;
                 gap: 4px;
             }
-            .header-actions {
-                justify-content: stretch;
-            }
-            .header-actions .btn {
-                flex: 1;
-                justify-content: center;
-            }
+            .header-actions { justify-content: stretch; }
+            .header-actions .btn { flex: 1; justify-content: center; }
         }
 
-        input,
-        select,
-        textarea {
-            font-size: 16px !important;
-        }
+        input, select, textarea { font-size: 16px !important; }
 
         @media print {
-            .btn,
-            .header-actions,
-            .search-wrapper,
-            .customer-selector .add-btn,
-            .customer-selector .actions,
-            .nav-path .path-actions,
-            .price-card .card-actions {
+            .btn, .header-actions, .search-wrapper,
+            .customer-selector .add-btn, .customer-selector .actions,
+            .nav-path .path-actions, .price-card .card-actions,
+            .jump-link, .mode-toggle {
                 display: none !important;
             }
-            .customer-selector,
-            .nav-path,
-            .info-section {
-                break-inside: avoid;
-            }
-            body {
-                background: #fff;
-                color: #000;
-            }
-            .price-card {
-                background: #f5f5f5;
-                border-color: #ccc;
-            }
+            .customer-selector, .nav-path, .info-section { break-inside: avoid; }
+            body { background: #fff; color: #000; }
+            .price-card { background: #f5f5f5; border-color: #ccc; }
             .customer-selector select {
                 background: #f0f0f0;
                 color: #000;
                 border-color: #ccc;
             }
-            .info-items {
-                max-height: none;
-                overflow-y: visible;
-            }
+            .info-items { max-height: none; overflow-y: visible; }
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== 头部 ===== -->
     <header class="app-header">
         <div class="brand">
             📋 客户专属价格表
@@ -810,36 +861,33 @@
         </div>
     </header>
 
-    <!-- ===== 搜索区 ===== -->
     <div class="search-wrapper">
         <input type="text" id="globalSearch" placeholder="🔍 全局搜索 客户、材料、价格..." inputmode="search" autocomplete="off" />
         <div class="search-suggestions" id="searchSuggestions"></div>
     </div>
 
-    <!-- ===== 客户下拉框 ===== -->
     <div class="customer-selector" id="customerSelector">
-        <label for="customerSelect">客户</label>
+        <button class="mode-toggle" id="modeToggle" type="button" title="点击切换 客户 / 材料 模式">客户</button>
         <select id="customerSelect" aria-label="选择客户"></select>
-        <div class="actions">
+        <select id="materialSelect" aria-label="选择材料" style="display:none;"></select>
+        <div class="actions" id="customerActions">
             <button class="btn-icon" id="editCustomerBtn" title="编辑当前客户" style="display:none;">✎</button>
             <button class="btn-icon danger" id="deleteCustomerBtn" title="删除当前客户" style="display:none;">✕</button>
             <button class="add-btn" id="addCustomerBtn" title="添加客户">+</button>
         </div>
     </div>
 
-    <!-- ===== 路径显示 ===== -->
     <div class="nav-path" id="navPath">
-        <span class="path-label">📍 当前客户</span>
+        <span class="path-label" id="pathLabel">📍 当前客户</span>
         <span id="pathDisplay" class="path-empty">未选择</span>
         <div class="path-actions">
             <button class="btn btn-sm btn-primary" id="addPriceBtn">+ 添加价格</button>
         </div>
     </div>
 
-    <!-- ===== 价格清单（带滚动） ===== -->
     <section class="info-section" id="infoSection">
         <div class="info-header">
-            <span class="info-title">📋 价格清单</span>
+            <span class="info-title" id="infoTitle">📋 价格清单</span>
             <span class="info-count" id="itemCount"></span>
         </div>
         <div class="info-items" id="infoItems">
@@ -847,7 +895,6 @@
         </div>
     </section>
 
-    <!-- ===== 模态框：编辑/添加 ===== -->
     <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true">
         <div class="modal-box">
             <h3 id="modalTitle">编辑</h3>
@@ -864,7 +911,6 @@
         </div>
     </div>
 
-    <!-- ===== 删除模态框 ===== -->
     <div class="modal-overlay delete-modal" id="deleteModalOverlay" role="dialog" aria-modal="true">
         <div class="modal-box">
             <h3 id="deleteModalTitle">🗑️ 删除确认</h3>
@@ -883,7 +929,6 @@
         </div>
     </div>
 
-    <!-- ===== 归档命名模态框 ===== -->
     <div class="modal-overlay" id="archiveModalOverlay" role="dialog" aria-modal="true">
         <div class="modal-box">
             <h3>📁 新建客户归档</h3>
@@ -905,9 +950,32 @@
         // ================================================================
         function genId() { return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7); }
 
+        function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+        // 按 26 英文字母顺序排序（不区分大小写，不做拼音转换）
+        function compareNames(a, b) {
+            const sa = String(a == null ? '' : a).toLowerCase();
+            const sb = String(b == null ? '' : b).toLowerCase();
+            if (sa < sb) return -1;
+            if (sa > sb) return 1;
+            return 0;
+        }
+
+        function escapeHtml(str) {
+            return String(str == null ? '' : str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+        function escapeAttr(str) { return escapeHtml(str); }
+
         const DEFAULT_DATA = [];
         let data = [];
         let selectedCustomerId = null;
+        let selectedMaterial = null;   // 材料模式当前选中的材料名
+        let mode = 'customer';          // 'customer' | 'material'
         let globalSearchTerm = '';
         let deleteContext = { id: null, name: '' };
         let archiveContext = { id: null };
@@ -928,10 +996,18 @@
             }
         }
 
-        function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
-
         // ---- 数据访问 ----
         function getCustomerById(id) { return data.find(c => c.id === id) || null; }
+
+        function findItemById(id) {
+            for (const c of data) {
+                if (c.items) {
+                    const found = c.items.find(i => i.id === id);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
 
         function getItemNameById(type, id) {
             if (type === 'customer') {
@@ -939,35 +1015,38 @@
                 return c ? c.name : '未知';
             }
             if (type === 'price') {
-                for (const c of data) {
-                    if (c.items) {
-                        const found = c.items.find(i => i.id === id);
-                        if (found) return found.name || '未命名';
-                    }
-                }
-                return '未知';
+                const found = findItemById(id);
+                return found ? (found.name || '未命名') : '未知';
             }
             return '未知';
         }
 
-        function getFullPathInfo(type, id) {
-            if (type === 'customer') {
-                const c = getCustomerById(id);
-                if (!c) return null;
-                return { customer: c.name, item: null };
-            }
-            if (type === 'price') {
-                for (const c of data) {
-                    if (c.items) {
-                        const found = c.items.find(i => i.id === id);
-                        if (found) {
-                            return { customer: c.name, item: found };
-                        }
+        // 提取所有材料名（去重，按 A-Z 排序）
+        function getAllMaterials() {
+            const set = new Set();
+            for (const c of data) {
+                if (c.items) {
+                    for (const item of c.items) {
+                        if (item.name) set.add(item.name);
                     }
                 }
-                return null;
             }
-            return null;
+            return Array.from(set).sort(compareNames);
+        }
+
+        // 反查：拥有该材料的所有客户（按客户名排序）
+        function getCustomersByMaterial(materialName) {
+            const results = [];
+            for (const c of data) {
+                if (c.items) {
+                    const matches = c.items.filter(i => i.name === materialName);
+                    if (matches.length > 0) {
+                        results.push({ customer: c, items: matches });
+                    }
+                }
+            }
+            results.sort((a, b) => compareNames(a.customer.name, b.customer.name));
+            return results;
         }
 
         // ---- 迁移 ----
@@ -1021,12 +1100,7 @@
                     }
                     return newData;
                 } else {
-                    return tree.map(c => {
-                        return {
-                            ...c,
-                            items: migrateItems(c.items || [])
-                        };
-                    });
+                    return tree.map(c => ({ ...c, items: migrateItems(c.items || []) }));
                 }
             }
             return [];
@@ -1090,107 +1164,113 @@
 
         function autoSelectFirst() {
             if (data.length > 0) {
-                selectedCustomerId = data[0].id;
+                // 按 A-Z 排序后取第一个
+                const sorted = [...data].sort((a, b) => compareNames(a.name, b.name));
+                selectedCustomerId = sorted[0].id;
             } else {
                 selectedCustomerId = null;
             }
         }
 
         // ================================================================
-        //  渲染函数
+        //  渲染
         // ================================================================
 
-        // ---- 下拉框 ----
+        // ---- 客户下拉框（按 A-Z 排序）----
         function renderCustomerSelect() {
             const select = document.getElementById('customerSelect');
-            const options = data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-            select.innerHTML = `<option value="">-- 请选择客户 --</option>` + options;
-            if (selectedCustomerId) {
-                const opt = select.querySelector(`option[value="${selectedCustomerId}"]`);
-                if (opt) select.value = selectedCustomerId;
+            const sorted = [...data].sort((a, b) => compareNames(a.name, b.name));
+            let html = `<option value="">-- 请选择客户 --</option>`;
+            for (const c of sorted) {
+                html += `<option value="${escapeAttr(c.id)}">${escapeHtml(c.name)}</option>`;
+            }
+            select.innerHTML = html;
+            if (selectedCustomerId && sorted.some(c => c.id === selectedCustomerId)) {
+                select.value = selectedCustomerId;
             } else {
                 select.value = '';
+                if (selectedCustomerId) selectedCustomerId = null;
             }
-            const show = !!selectedCustomerId;
+
+            const show = !!selectedCustomerId && mode === 'customer';
             document.getElementById('editCustomerBtn').style.display = show ? 'inline-flex' : 'none';
             document.getElementById('deleteCustomerBtn').style.display = show ? 'inline-flex' : 'none';
-            updatePathDisplay();
         }
 
-        // ---- 路径 ----
-        function updatePathDisplay() {
-            const pathEl = document.getElementById('pathDisplay');
-            const customer = selectedCustomerId ? getCustomerById(selectedCustomerId) : null;
-            if (customer) {
-                pathEl.innerHTML = `<span class="path-segment"><span class="seg-name">${customer.name}</span></span>`;
+        // ---- 材料下拉框（按 A-Z 排序）----
+        function renderMaterialSelect() {
+            const select = document.getElementById('materialSelect');
+            const materials = getAllMaterials();
+            let html = `<option value="">-- 请选择材料 --</option>`;
+            for (const m of materials) {
+                html += `<option value="${escapeAttr(m)}">${escapeHtml(m)}</option>`;
+            }
+            select.innerHTML = html;
+            if (selectedMaterial && materials.includes(selectedMaterial)) {
+                select.value = selectedMaterial;
             } else {
-                pathEl.innerHTML = '<span class="path-empty">未选择</span>';
+                select.value = '';
+                if (selectedMaterial) selectedMaterial = null;
             }
         }
 
-        // ---- 价格清单 ----
-        function renderPriceItems() {
+        // ---- 路径显示 ----
+        function updatePathDisplay() {
+            const pathEl = document.getElementById('pathDisplay');
+            const pathLabel = document.getElementById('pathLabel');
+            const addPriceBtn = document.getElementById('addPriceBtn');
+
+            if (mode === 'material') {
+                pathLabel.textContent = '📍 当前材料';
+                if (selectedMaterial) {
+                    pathEl.innerHTML = `<span class="path-segment"><span class="seg-name">${escapeHtml(selectedMaterial)}</span></span>`;
+                } else {
+                    pathEl.innerHTML = '<span class="path-empty">未选择</span>';
+                }
+                addPriceBtn.style.display = 'none';
+            } else {
+                pathLabel.textContent = '📍 当前客户';
+                const customer = selectedCustomerId ? getCustomerById(selectedCustomerId) : null;
+                if (customer) {
+                    pathEl.innerHTML = `<span class="path-segment"><span class="seg-name">${escapeHtml(customer.name)}</span></span>`;
+                } else {
+                    pathEl.innerHTML = '<span class="path-empty">未选择</span>';
+                }
+                addPriceBtn.style.display = '';
+            }
+        }
+
+        // ---- 标题 ----
+        function updateInfoTitle() {
+            const el = document.getElementById('infoTitle');
+            if (globalSearchTerm.trim()) {
+                el.textContent = '🔍 搜索结果';
+            } else if (mode === 'material') {
+                el.textContent = '📋 材料报价清单';
+            } else {
+                el.textContent = '📋 价格清单';
+            }
+        }
+
+        // ---- 主渲染入口 ----
+        function renderMainList() {
             const container = document.getElementById('infoItems');
             const countEl = document.getElementById('itemCount');
             const searchTerm = globalSearchTerm.trim().toLowerCase();
 
             if (searchTerm) {
-                const results = performGlobalSearch(searchTerm);
-                if (results.length === 0) {
-                    container.innerHTML = `<div class="info-empty">🔍 未找到匹配项</div>`;
-                    countEl.textContent = '0 匹配';
-                    return;
-                }
-                let html = '';
-                let itemCount = 0;
-                for (const res of results) {
-                    if (res.type === 'price') {
-                        const item = res.item;
-                        const priceDisplay = item.location ? '¥' + highlightText(item.location, searchTerm) : '未定价';
-                        const nameDisplay = highlightText(item.name, searchTerm);
-                        const noteDisplay = item.note ? highlightText(item.note, searchTerm) : '';
-                        html += `
-                            <div class="price-card" data-id="${item.id}">
-                                <div class="card-main">
-                                    <div class="material-name">${nameDisplay}</div>
-                                    <div class="price-value">${priceDisplay}</div>
-                                    ${noteDisplay ? `<div class="price-note">📝 ${noteDisplay}</div>` : ''}
-                                </div>
-                                <div class="card-actions">
-                                    <button class="btn-icon" data-action="editPrice" data-id="${item.id}" title="编辑">✎</button>
-                                    <button class="btn-icon danger" data-action="deletePrice" data-id="${item.id}" title="删除">✕</button>
-                                </div>
-                            </div>
-                            <div style="font-size:11px;color:var(--text-muted);padding:0 12px 6px;border-bottom:1px solid var(--border-color);">📍 ${highlightText(res.path, searchTerm)}</div>
-                        `;
-                        itemCount++;
-                    } else {
-                        html += `
-                            <div class="price-card" style="flex-direction:column;align-items:stretch;gap:2px;padding:10px 12px;cursor:pointer;" data-nav-type="customer" data-nav-id="${res.id}">
-                                <div style="display:flex;justify-content:space-between;align-items:center;">
-                                    <span style="font-weight:700;">${highlightText(res.name, searchTerm)}</span>
-                                    <span style="font-size:12px;color:var(--purple-light);">客户</span>
-                                </div>
-                                <div style="font-size:12px;color:var(--text-muted);">📍 ${highlightText(res.path, searchTerm)}</div>
-                            </div>
-                        `;
-                        itemCount++;
-                    }
-                }
-                container.innerHTML = html;
-                countEl.textContent = `匹配 ${itemCount} 项`;
-                container.querySelectorAll('[data-nav-type]').forEach(el => {
-                    el.addEventListener('click', () => {
-                        const type = el.dataset.navType;
-                        const id = el.dataset.navId;
-                        navigateTo(type, id);
-                    });
-                });
-                bindPriceActions();
+                renderSearchResults(container, countEl, searchTerm);
                 return;
             }
+            if (mode === 'material') {
+                renderMaterialResults(container, countEl);
+                return;
+            }
+            renderPriceItems(container, countEl);
+        }
 
-            // 正常模式
+        // ---- 客户模式：价格清单（按材料名排序）----
+        function renderPriceItems(container, countEl) {
             const customer = selectedCustomerId ? getCustomerById(selectedCustomerId) : null;
             if (!customer) {
                 container.innerHTML = `<div class="info-empty">← 选择客户查看价格</div>`;
@@ -1198,7 +1278,7 @@
                 return;
             }
 
-            const items = customer.items || [];
+            const items = [...(customer.items || [])].sort((a, b) => compareNames(a.name, b.name));
             countEl.textContent = `共 ${items.length} 项`;
 
             if (items.length === 0) {
@@ -1208,22 +1288,133 @@
 
             let html = '';
             for (const item of items) {
-                const priceDisplay = item.location ? '¥' + item.location : '未定价';
+                const priceDisplay = item.location ? '¥' + escapeHtml(item.location) : '未定价';
                 html += `
-                    <div class="price-card" data-id="${item.id}">
+                    <div class="price-card" data-id="${escapeAttr(item.id)}">
                         <div class="card-main">
-                            <div class="material-name">${item.name}</div>
+                            <div class="material-name">${escapeHtml(item.name)}</div>
                             <div class="price-value">${priceDisplay}</div>
-                            ${item.note ? `<div class="price-note">📝 ${item.note}</div>` : ''}
+                            ${item.note ? `<div class="price-note">📝 ${escapeHtml(item.note)}</div>` : ''}
                         </div>
                         <div class="card-actions">
-                            <button class="btn-icon" data-action="editPrice" data-id="${item.id}" title="编辑">✎</button>
-                            <button class="btn-icon danger" data-action="deletePrice" data-id="${item.id}" title="删除">✕</button>
+                            <button class="btn-icon" data-action="editPrice" data-id="${escapeAttr(item.id)}" title="编辑">✎</button>
+                            <button class="btn-icon danger" data-action="deletePrice" data-id="${escapeAttr(item.id)}" title="删除">✕</button>
                         </div>
                     </div>
                 `;
             }
             container.innerHTML = html;
+            bindPriceActions();
+        }
+
+        // ---- 材料模式：材料报价清单 ----
+        function renderMaterialResults(container, countEl) {
+            if (!selectedMaterial) {
+                container.innerHTML = `<div class="info-empty">← 请选择材料查看报价</div>`;
+                countEl.textContent = '';
+                return;
+            }
+
+            const results = getCustomersByMaterial(selectedMaterial);
+            if (results.length === 0) {
+                container.innerHTML = `<div class="info-empty">📭 没有客户拥有该材料</div>`;
+                countEl.textContent = '0 项';
+                return;
+            }
+
+            const totalQuotes = results.reduce((sum, r) => sum + r.items.length, 0);
+            countEl.textContent = `${results.length} 个客户 · ${totalQuotes} 条报价`;
+
+            let html = '';
+            for (const res of results) {
+                const c = res.customer;
+                const multiple = res.items.length > 1;
+
+                html += `<div class="price-card material-result-card ${multiple ? 'has-duplicate' : ''}" data-customer-id="${escapeAttr(c.id)}">`;
+                html += `<div class="card-main">`;
+                html += `<div class="customer-name">🏷️ ${escapeHtml(c.name)}</div>`;
+                if (multiple) {
+                    html += `<div class="duplicate-warning">⚠️ 该客户有多个同名材料，请留意区分</div>`;
+                }
+                html += `<div class="material-price-list">`;
+                for (let i = 0; i < res.items.length; i++) {
+                    const item = res.items[i];
+                    const priceDisplay = item.location ? escapeHtml(item.location) : '未定价';
+                    const altClass = multiple ? `alt-color-${i % 3}` : '';
+                    html += `<div class="material-price-row ${altClass}">`;
+                    html += `<span class="mp-price">${priceDisplay}</span>`;
+                    if (item.note) html += `<span class="mp-note">📝 ${escapeHtml(item.note)}</span>`;
+                    html += `</div>`;
+                }
+                html += `</div></div>`;
+                html += `<div class="card-footer">`;
+                html += `<a class="jump-link" data-customer-id="${escapeAttr(c.id)}">查看该客户价格清单 →</a>`;
+                html += `</div>`;
+                html += `</div>`;
+            }
+            container.innerHTML = html;
+
+            container.querySelectorAll('.jump-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    jumpToCustomer(link.dataset.customerId, selectedMaterial);
+                });
+            });
+        }
+
+        // ---- 全局搜索结果 ----
+        function renderSearchResults(container, countEl, searchTerm) {
+            const results = performGlobalSearch(searchTerm);
+            if (results.length === 0) {
+                container.innerHTML = `<div class="info-empty">🔍 未找到匹配项</div>`;
+                countEl.textContent = '0 匹配';
+                return;
+            }
+            let html = '';
+            let itemCount = 0;
+            for (const res of results) {
+                if (res.type === 'price') {
+                    const item = res.item;
+                    const priceDisplay = item.location ? '¥' + highlightText(item.location, searchTerm) : '未定价';
+                    const nameDisplay = highlightText(item.name, searchTerm);
+                    const noteDisplay = item.note ? highlightText(item.note, searchTerm) : '';
+                    html += `
+                        <div class="price-card" data-id="${escapeAttr(item.id)}">
+                            <div class="card-main">
+                                <div class="material-name">${nameDisplay}</div>
+                                <div class="price-value">${priceDisplay}</div>
+                                ${noteDisplay ? `<div class="price-note">📝 ${noteDisplay}</div>` : ''}
+                            </div>
+                            <div class="card-actions">
+                                <button class="btn-icon" data-action="editPrice" data-id="${escapeAttr(item.id)}" title="编辑">✎</button>
+                                <button class="btn-icon danger" data-action="deletePrice" data-id="${escapeAttr(item.id)}" title="删除">✕</button>
+                            </div>
+                        </div>
+                        <div style="font-size:11px;color:var(--text-muted);padding:0 12px 6px;border-bottom:1px solid var(--border-color);">📍 ${highlightText(res.path, searchTerm)}</div>
+                    `;
+                    itemCount++;
+                } else {
+                    html += `
+                        <div class="price-card" style="flex-direction:column;align-items:stretch;gap:2px;padding:10px 12px;cursor:pointer;" data-nav-type="customer" data-nav-id="${escapeAttr(res.id)}">
+                            <div style="display:flex;justify-content:space-between;align-items:center;">
+                                <span style="font-weight:700;">${highlightText(res.name, searchTerm)}</span>
+                                <span style="font-size:12px;color:var(--purple-light);">客户</span>
+                            </div>
+                            <div style="font-size:12px;color:var(--text-muted);">📍 ${highlightText(res.path, searchTerm)}</div>
+                        </div>
+                    `;
+                    itemCount++;
+                }
+            }
+            container.innerHTML = html;
+            countEl.textContent = `匹配 ${itemCount} 项`;
+
+            container.querySelectorAll('[data-nav-type]').forEach(el => {
+                el.addEventListener('click', () => {
+                    navigateTo(el.dataset.navType, el.dataset.navId);
+                });
+            });
             bindPriceActions();
         }
 
@@ -1245,9 +1436,9 @@
         }
 
         function highlightText(text, term) {
-            if (!text || !term) return text || '';
+            if (!text || !term) return escapeHtml(text || '');
             const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-            return text.replace(regex, '<span class="highlight">$1</span>');
+            return escapeHtml(text).replace(regex, '<span class="highlight">$1</span>');
         }
 
         // ---- 全局搜索 ----
@@ -1288,7 +1479,6 @@
             return unique.slice(0, 30);
         }
 
-        // ---- 搜索建议下拉 ----
         function renderSuggestions(term) {
             const container = document.getElementById('searchSuggestions');
             if (!term || term.trim().length === 0) {
@@ -1304,12 +1494,10 @@
             let html = '';
             for (const res of results) {
                 const typeLabel = res.type === 'customer' ? '客户' : '价格';
-                const nameHighlight = highlightText(res.name, term);
-                const pathHighlight = highlightText(res.path, term);
                 html += `
-                    <div class="suggestion-item" data-type="${res.type}" data-id="${res.id}">
-                        <div class="sug-name">${nameHighlight}</div>
-                        <div class="sug-path">${pathHighlight}</div>
+                    <div class="suggestion-item" data-type="${escapeAttr(res.type)}" data-id="${escapeAttr(res.id)}">
+                        <div class="sug-name">${highlightText(res.name, term)}</div>
+                        <div class="sug-path">${highlightText(res.path, term)}</div>
                         <span class="sug-type">${typeLabel}</span>
                     </div>
                 `;
@@ -1319,9 +1507,7 @@
 
             container.querySelectorAll('.suggestion-item').forEach(el => {
                 el.addEventListener('click', () => {
-                    const type = el.dataset.type;
-                    const id = el.dataset.id;
-                    navigateTo(type, id);
+                    navigateTo(el.dataset.type, el.dataset.id);
                 });
             });
         }
@@ -1330,9 +1516,10 @@
             document.getElementById('searchSuggestions').classList.remove('active');
         }
 
-        // ---- 导航到目标 ----
+        // ---- 导航 ----
         function navigateTo(type, id) {
             if (type === 'customer') {
+                mode = 'customer';
                 selectedCustomerId = id;
                 globalSearchTerm = '';
                 document.getElementById('globalSearch').value = '';
@@ -1342,6 +1529,7 @@
                 return;
             }
             if (type === 'price') {
+                mode = 'customer';
                 for (const c of data) {
                     if (c.items && c.items.some(i => i.id === id)) {
                         selectedCustomerId = c.id;
@@ -1359,22 +1547,79 @@
                         card.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         setTimeout(() => card.classList.remove('highlight-card'), 2000);
                     }
-                }, 150);
+                }, 200);
                 showToast('✅ 已定位到价格：' + getItemNameById('price', id));
             }
+        }
+
+        // ---- 从材料模式跳回客户模式 ----
+        function jumpToCustomer(customerId, materialName) {
+            mode = 'customer';
+            selectedCustomerId = customerId;
+            globalSearchTerm = '';
+            document.getElementById('globalSearch').value = '';
+            closeSuggestions();
+            renderAll();
+
+            setTimeout(() => {
+                const cards = document.querySelectorAll('.price-card[data-id]');
+                for (const card of cards) {
+                    const item = findItemById(card.dataset.id);
+                    if (item && item.name === materialName) {
+                        card.classList.add('highlight-card');
+                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        setTimeout(() => card.classList.remove('highlight-card'), 2500);
+                        break;
+                    }
+                }
+            }, 250);
+
+            showToast('✅ 已跳转到客户：' + getItemNameById('customer', customerId));
         }
 
         // ---- 全量渲染 ----
         function renderAll() {
             scheduleRender(() => {
-                renderCustomerSelect();
-                renderPriceItems();
+                // 模式 UI 显隐
+                const toggle = document.getElementById('modeToggle');
+                const customerSelect = document.getElementById('customerSelect');
+                const materialSelect = document.getElementById('materialSelect');
+                const customerActions = document.getElementById('customerActions');
+
+                if (mode === 'customer') {
+                    toggle.textContent = '客户';
+                    customerSelect.style.display = '';
+                    materialSelect.style.display = 'none';
+                    customerActions.style.display = 'flex';
+                    renderCustomerSelect();
+                } else {
+                    toggle.textContent = '材料';
+                    customerSelect.style.display = 'none';
+                    materialSelect.style.display = '';
+                    customerActions.style.display = 'none';
+                    renderMaterialSelect();
+                }
+
+                updatePathDisplay();
+                updateInfoTitle();
+                renderMainList();
                 saveToLocalStorage();
             });
         }
 
         // ================================================================
-        //  选择逻辑（下拉框事件）
+        //  模式切换
+        // ================================================================
+        function setMode(newMode) {
+            if (mode === newMode) return;
+            mode = newMode;
+            // 保留搜索词（不清空 globalSearchTerm）
+            renderAll();
+            showToast(newMode === 'material' ? '🔀 已切换到材料模式' : '🔀 已切换到客户模式');
+        }
+
+        // ================================================================
+        //  选择逻辑
         // ================================================================
         function onCustomerSelect(value) {
             if (!value) {
@@ -1389,11 +1634,23 @@
             renderAll();
         }
 
-        // ================================================================
-        //  CRUD 操作
-        // ================================================================
+        function onMaterialSelect(value) {
+            if (!value) {
+                selectedMaterial = null;
+                renderAll();
+                return;
+            }
+            selectedMaterial = value;
+            // 选择材料时清空搜索，以便显示材料结果
+            globalSearchTerm = '';
+            document.getElementById('globalSearch').value = '';
+            closeSuggestions();
+            renderAll();
+        }
 
-        // ---- 客户 ----
+        // ================================================================
+        //  CRUD
+        // ================================================================
         function addCustomer(name) {
             if (!name.trim()) { showToast('⚠️ 名称不能为空'); return; }
             const newNode = { id: genId(), name: name.trim(), items: [] };
@@ -1406,20 +1663,22 @@
         function editCustomer(id, newName) {
             if (!newName.trim()) { showToast('⚠️ 名称不能为空'); return; }
             const node = getCustomerById(id);
-            if (node) { node.name = newName.trim();
+            if (node) {
+                node.name = newName.trim();
                 renderAll();
-                showToast('✅ 已更新'); }
+                showToast('✅ 已更新');
+            }
         }
 
-        function deleteCustomer(id, mode, archiveName) {
+        function deleteCustomer(id, modeArg, archiveName) {
             const idx = data.findIndex(c => c.id === id);
             if (idx === -1) return;
             const customer = data[idx];
             const items = customer.items || [];
 
-            if (mode === 'cascade') {
+            if (modeArg === 'cascade') {
                 data.splice(idx, 1);
-            } else if (mode === 'only') {
+            } else if (modeArg === 'only') {
                 data.splice(idx, 1);
                 if (items.length > 0) {
                     let uncat = data.find(c => c.name === '未归类');
@@ -1430,7 +1689,7 @@
                     if (!uncat.items) uncat.items = [];
                     uncat.items.push(...items);
                 }
-            } else if (mode === 'archive') {
+            } else if (modeArg === 'archive') {
                 data.splice(idx, 1);
                 if (items.length > 0) {
                     const newCustomer = { id: genId(), name: archiveName || '已归档', items: items };
@@ -1442,37 +1701,29 @@
                 selectedCustomerId = data.length ? data[0].id : null;
             }
             renderAll();
-            const msg = mode === 'only' ? '已删除，价格移至"未归类"' : mode === 'cascade' ? '已级联删除' : '已删除，价格归档到新客户';
+            const msg = modeArg === 'only' ? '已删除，价格移至"未归类"' : modeArg === 'cascade' ? '已级联删除' : '已删除，价格归档到新客户';
             showToast('🗑️ ' + msg);
         }
 
-        // ---- 价格 ----
         function addPrice(customerId, name, location, note) {
             if (!name.trim()) { showToast('⚠️ 材料名称不能为空'); return; }
             const customer = getCustomerById(customerId);
             if (!customer) { showToast('⚠️ 请先选择客户'); return; }
             if (!customer.items) customer.items = [];
             customer.items.push({ id: genId(), name: name.trim(), location: location.trim() || '', note: note.trim() || '' });
-            renderPriceItems();
-            saveToLocalStorage();
+            renderAll();
             showToast('✅ 已添加价格');
         }
 
         function editPrice(id, name, location, note) {
             if (!name.trim()) { showToast('⚠️ 材料名称不能为空'); return; }
-            for (const c of data) {
-                if (c.items) {
-                    const item = c.items.find(i => i.id === id);
-                    if (item) {
-                        item.name = name.trim();
-                        item.location = location.trim() || '';
-                        item.note = note.trim() || '';
-                        renderPriceItems();
-                        saveToLocalStorage();
-                        showToast('✅ 已更新');
-                        return;
-                    }
-                }
+            const item = findItemById(id);
+            if (item) {
+                item.name = name.trim();
+                item.location = location.trim() || '';
+                item.note = note.trim() || '';
+                renderAll();
+                showToast('✅ 已更新');
             }
         }
 
@@ -1482,8 +1733,7 @@
                     const idx = c.items.findIndex(i => i.id === id);
                     if (idx !== -1) {
                         c.items.splice(idx, 1);
-                        renderPriceItems();
-                        saveToLocalStorage();
+                        renderAll();
                         showToast('🗑️ 已删除价格');
                         return;
                     }
@@ -1494,7 +1744,6 @@
         // ================================================================
         //  模态框
         // ================================================================
-
         function showDeleteModal(type, id, name) {
             deleteContext.id = id;
             deleteContext.name = name;
@@ -1517,20 +1766,14 @@
 
         document.getElementById('deleteOnlyBtn').addEventListener('click', () => {
             const id = deleteContext.id;
-            if (id) {
-                deleteCustomer(id, 'only');
-                closeDeleteModal();
-            }
+            if (id) { deleteCustomer(id, 'only'); closeDeleteModal(); }
         });
         document.getElementById('deleteCascadeBtn').addEventListener('click', () => {
             const id = deleteContext.id;
             if (id) {
-                const isPrice = document.querySelector(`.price-card[data-id="${id}"]`) !== null;
-                if (isPrice) {
-                    deletePrice(id);
-                } else {
-                    deleteCustomer(id, 'cascade');
-                }
+                const isPrice = findItemById(id) !== null;
+                if (isPrice) deletePrice(id);
+                else deleteCustomer(id, 'cascade');
                 closeDeleteModal();
             }
         });
@@ -1559,7 +1802,6 @@
             deleteContext = { id: null, name: '' };
         }
 
-        // 归档
         document.getElementById('archiveCancelBtn').addEventListener('click', () => {
             document.getElementById('archiveModalOverlay').classList.remove('active');
         });
@@ -1579,7 +1821,6 @@
             if (e.key === 'Enter') document.getElementById('archiveConfirmBtn').click();
         });
 
-        // 编辑/添加模态框
         function openEditModal(type, id) {
             const overlay = document.getElementById('modalOverlay');
             const title = document.getElementById('modalTitle');
@@ -1612,13 +1853,7 @@
                 return;
             }
 
-            let item = null;
-            for (const c of data) {
-                if (c.items) {
-                    const found = c.items.find(i => i.id === id);
-                    if (found) { item = found; break; }
-                }
-            }
+            const item = findItemById(id);
             if (!item) { showToast('⚠️ 未找到价格条目'); return; }
             title.textContent = '✎ 编辑价格';
             nameLabel.textContent = '材料名称 *';
@@ -1746,9 +1981,16 @@
         // ================================================================
         //  事件绑定
         // ================================================================
+        document.getElementById('modeToggle').addEventListener('click', () => {
+            setMode(mode === 'customer' ? 'material' : 'customer');
+        });
 
         document.getElementById('customerSelect').addEventListener('change', (e) => {
             onCustomerSelect(e.target.value);
+        });
+
+        document.getElementById('materialSelect').addEventListener('change', (e) => {
+            onMaterialSelect(e.target.value);
         });
 
         document.getElementById('addCustomerBtn').addEventListener('click', () => openAddModal('customer', null));
@@ -1779,6 +2021,7 @@
             if (confirm('⚠️ 重置将清除所有数据，恢复为空状态。确定吗？')) {
                 data = [];
                 selectedCustomerId = null;
+                selectedMaterial = null;
                 renderAll();
                 showToast('↺ 已重置');
             }
@@ -1791,7 +2034,7 @@
             searchTimeout = setTimeout(() => {
                 globalSearchTerm = term;
                 renderSuggestions(term);
-                renderPriceItems();
+                renderAll();
             }, 180);
         });
         document.addEventListener('click', (e) => {
@@ -1809,9 +2052,6 @@
             }
             autoSelectFirst();
             renderAll();
-            if (data.length === 0) {
-                document.getElementById('customerSelect').innerHTML = `<option value="">-- 请先添加客户 --</option>`;
-            }
         }
 
         if (document.readyState === 'loading') {
@@ -1820,7 +2060,7 @@
             init();
         }
 
-        console.log('📋 客户专属价格表 v4 · 仿宋 + 粗体 + 滚动');
+        console.log('📋 客户专属价格表 v5 · 客户/材料双模式 + A-Z 排序');
     </script>
 </body>
 </html>
